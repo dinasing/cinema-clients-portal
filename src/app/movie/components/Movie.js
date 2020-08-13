@@ -27,7 +27,7 @@ class Movie extends Component {
           <img
             height="450px"
             self-align="center"
-            src={movie.poster ? movie.poster : 'https://kinoactive.ru/uploads/no-poster.jpg'}
+            src={movie.poster || 'https://kinoactive.ru/uploads/no-poster.jpg'}
             alt="poster"
           />{' '}
           <Container>
