@@ -1,8 +1,12 @@
 import React, { Component } from 'react';
 import { Switch, Route, Redirect } from 'react-router-dom';
 import { connect } from 'react-redux';
+import { store } from '../../store';
+import { ProtectedRoute } from './ProtectedRoute';
 import Login from '../../auth/components/Login';
 import SignUp from '../../auth/components/SignUp';
+import Movies from '../../movie/components/MovieList';
+import Movie from '../../movie/components/Movie';
 
 class Routes extends Component {
   render() {
@@ -17,6 +21,8 @@ class Routes extends Component {
           path="/signup"
           render={() => (isAuthenticated ? <Redirect to="/movies" /> : <SignUp />)}
         />
+        <Route exact path="/movies" component={Movies} store={store} />
+        <Route exact path="/movies/:movie_id" component={Movie} store={store} />
 
         <Route path="*" component={() => '404 NOT FOUND'} />
       </Switch>
