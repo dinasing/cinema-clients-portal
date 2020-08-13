@@ -29,7 +29,7 @@ class AppNavbar extends Component {
     const { isAuthenticated, user } = this.props.auth;
 
     return (
-      <Navbar fixed color="light" light expand="sm" className="mb-5">
+      <Navbar color="light" light expand="sm" className="mb-5">
         <Container>
           <NavbarBrand href="/">Cinema</NavbarBrand>
           <Nav className="mr-auto " navbar>
