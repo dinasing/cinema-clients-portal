@@ -16,7 +16,9 @@ class Movie extends Component {
   render() {
     const { movie, movieTimes, genres } = this.props.movies;
     const movieGenres =
-      movie.genre && genres ? movie.genre.map(id => <i>{genres[id].name} </i>) : null;
+      movie.genre && genres
+        ? movie.genre.map(id => (genres[id] ? <i>{genres[id].name} </i> : null))
+        : [];
 
     return (
       <Container>
@@ -32,8 +34,8 @@ class Movie extends Component {
           />{' '}
           <Container>
             <p>{movie.description}</p>
+            {movieGenres ? <p> {movieGenres}</p> : null}
 
-            <p>Genres: {movieGenres}</p>
             <p>
               {moment(movie.release_date).format('DD.MM.YYYY') +
                 ' - ' +
