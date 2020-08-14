@@ -16,7 +16,7 @@ const apiKey = '5886c0d8ba5d3a8a90ea37b8b1dc8ca1';
 
 export const getMovies = () => dispatch => {
   dispatch(setMoviesLoading());
-  axios.get('/movie').then(res =>
+  axios.get('/movie/relevant').then(res =>
     dispatch({
       type: GET_MOVIES,
       payload: res.data,
@@ -33,11 +33,12 @@ export const getMovieById = id => dispatch => {
     })
   );
 };
+
 export const getMovieTimes = id => dispatch => {
   dispatch(setMoviesToInitialState());
   dispatch(setMoviesTimesLoading());
 
-  axios.get('/movie/' + id + '/movie-time/').then(res =>
+  axios.get('/movie/' + id + '/relevant-movie-time/').then(res =>
     dispatch({
       type: GET_MOVIE_TIMES,
       payload: res.data,
