@@ -3,11 +3,17 @@ import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import { Container, Row, Col, Media } from 'reactstrap';
 import moment from 'moment';
-import { getMovieById, getMovieTimes, getMovieGenres } from '../actions/movieAction';
+import {
+  getMovieById,
+  getMovieTimes,
+  getMovieGenres,
+  setMoviesToInitialState,
+} from '../actions/movieAction';
 import MovieTimesList from '../../movie times/components/MovieTimesList';
 
 class Movie extends Component {
   componentDidMount() {
+    this.props.setMoviesToInitialState();
     this.props.getMovieById(this.props.match.params.movie_id);
     this.props.getMovieTimes(this.props.match.params.movie_id);
     this.props.getMovieGenres();
@@ -65,6 +71,7 @@ Movie.propTypes = {
   getMovieById: PropTypes.func.isRequired,
   getMovieTimes: PropTypes.func.isRequired,
   getMovieGenres: PropTypes.func.isRequired,
+  setMoviesToInitialState: PropTypes.func.isRequired,
   movies: PropTypes.object,
 };
 
@@ -76,4 +83,5 @@ export default connect(mapStateToProps, {
   getMovieById,
   getMovieTimes,
   getMovieGenres,
+  setMoviesToInitialState,
 })(Movie);

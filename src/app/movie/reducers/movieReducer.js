@@ -6,6 +6,7 @@ import {
   MOVIE_TIMES_LOADING,
   GET_GENRES_FAIL,
   GET_GENRES,
+  CLEAN_MOVIES,
 } from '../../common/actions/types';
 
 const initialState = {
@@ -46,6 +47,8 @@ export default function(state = initialState, action) {
         ...state,
         genres: action.payload,
       };
+    case CLEAN_MOVIES:
+      return { ...initialState };
     case GET_GENRES_FAIL:
     default:
       return state;
