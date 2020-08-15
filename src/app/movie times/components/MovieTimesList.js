@@ -23,10 +23,10 @@ class MovieTimesList extends Component {
 const MovieTimeCard = props => {
   const { date, cinemas, movies } = props.movieTime;
   const MovieTimes = cinemas
-    ? cinemas.map(cinema => <CinemasMovieTimes cinema={cinema} />)
+    ? cinemas.map(cinema => <CinemasMovieTimes date={date} cinema={cinema} />)
     : movies
-      ? movies.map(movie => <MovieMovieTimes movie={movie} />)
-      : null;
+    ? movies.map(movie => <MovieMovieTimes date={date} movie={movie} />)
+    : null;
 
   return (
     <>
@@ -54,16 +54,45 @@ function sortByPrice(array) {
 
 const CinemasMovieTimes = props => {
   const { movieTimes, title, cinemaId } = props.cinema;
+  const date = new Date(props.date).setHours(0, 0, 0, 0);
+  const currentTime = new Date().getTime();
 
-  const timesBadges = sortByTime([...movieTimes]).map(movieTime => (
-    <>
-      {' '}
-      <Badge id={`movieTime${movieTime.id}`}> {movieTime.time.slice(0, -3)}</Badge>
-      <UncontrolledTooltip placement="right" target={`movieTime${movieTime.id}`}>
-        {sortByPrice([...movieTime.prices])[0].price}
-      </UncontrolledTooltip>
-    </>
-  ));
+  const timesBadges = sortByTime([...movieTimes]).map(movieTime => {
+    const time = new Date().setUTCHours(movieTime.time.slice(0, 2), movieTime.time.slice(3, 5));
+    return date === new Date().setHours(0, 0, 0, 0) ? (
+      <>
+        {' '}
+        {currentTime <= time ? (
+          <Link to="/movies">
+            <Badge color="" id={`movieTime${movieTime.id}`}>
+              {' '}
+              {movieTime.time.slice(0, -3)}
+            </Badge>
+          </Link>
+        ) : (
+          <Badge id={`movieTime${movieTime.id}`}> {movieTime.time.slice(0, -3)}</Badge>
+        )}
+        {currentTime <= time ? (
+          <UncontrolledTooltip placement="right" target={`movieTime${movieTime.id}`}>
+            {`price: ${sortByPrice([...movieTime.prices])[0].price} $`}
+          </UncontrolledTooltip>
+        ) : null}
+      </>
+    ) : (
+      <>
+        {' '}
+        <Link to="/movies">
+          <Badge color="" id={`movieTime${movieTime.id}`}>
+            {' '}
+            {movieTime.time.slice(0, -3)}
+          </Badge>
+        </Link>{' '}
+        <UncontrolledTooltip placement="right" target={`movieTime${movieTime.id}`}>
+          {`price: ${sortByPrice([...movieTime.prices])[0].price} $`}
+        </UncontrolledTooltip>
+      </>
+    );
+  });
 
   return (
     <Row>
@@ -78,20 +107,50 @@ const CinemasMovieTimes = props => {
 const MovieMovieTimes = props => {
   const { movieTimes, title, movieId } = props.movie;
 
-  const timesBadges = sortByTime([...movieTimes]).map(movieTime => (
-    <>
-      {' '}
-      <Badge id={`movieTime${movieTime.id}`}> {movieTime.time.slice(0, -3)}</Badge>
-      <UncontrolledTooltip placement="right" target={`movieTime${movieTime.id}`}>
-        {sortByPrice([...movieTime.prices])[0].price}
-      </UncontrolledTooltip>
-    </>
-  ));
+  const date = new Date(props.date).setHours(0, 0, 0, 0);
+  const currentTime = new Date().getTime();
+
+  const timesBadges = sortByTime([...movieTimes]).map(movieTime => {
+    const time = new Date().setUTCHours(movieTime.time.slice(0, 2), movieTime.time.slice(3, 5));
+    return date === new Date().setHours(0, 0, 0, 0) ? (
+      <>
+        {' '}
+        {currentTime <= time ? (
+          <Link to="/movies">
+            <Badge color="" id={`movieTime${movieTime.id}`}>
+              {' '}
+              {movieTime.time.slice(0, -3)}
+            </Badge>
+          </Link>
+        ) : (
+          <Badge id={`movieTime${movieTime.id}`}> {movieTime.time.slice(0, -3)}</Badge>
+        )}
+        {currentTime <= time ? (
+          <UncontrolledTooltip placement="right" target={`movieTime${movieTime.id}`}>
+            {`price: ${sortByPrice([...movieTime.prices])[0].price} $`}
+          </UncontrolledTooltip>
+        ) : null}
+      </>
+    ) : (
+      <>
+        {' '}
+        <Link to="/movies">
+          <Badge color="" id={`movieTime${movieTime.id}`}>
+            {' '}
+            {movieTime.time.slice(0, -3)}
+          </Badge>
+        </Link>{' '}
+        <UncontrolledTooltip placement="right" target={`movieTime${movieTime.id}`}>
+          {`price: ${sortByPrice([...movieTime.prices])[0].price} $`}
+        </UncontrolledTooltip>
+      </>
+    );
+  });
 
   return (
     <Row>
       <Col>
-        <Link to={`/movies/${movieId}`}>{title}</Link>
+        <Link to={`/movie-theaters/${cinemaId}`}>{title}</Link>
       </Col>
       <Col>{timesBadges}</Col>
     </Row>
