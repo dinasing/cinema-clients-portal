@@ -7,6 +7,7 @@ import Login from '../../auth/components/Login';
 import SignUp from '../../auth/components/SignUp';
 import Movies from '../../movie/components/MovieList';
 import Movie from '../../movie/components/Movie';
+import BookingContainer from '../../movie times/components/BookingContainer';
 
 class Routes extends Component {
   render() {
@@ -23,6 +24,8 @@ class Routes extends Component {
         />
         <Route exact path="/movies" component={Movies} store={store} />
         <Route exact path="/movies/:movie_id" component={Movie} store={store} />
+
+        <Route exact path="/session/:session_id" component={BookingContainer} store={store} />
 
         <Route path="*" component={() => '404 NOT FOUND'} />
       </Switch>
