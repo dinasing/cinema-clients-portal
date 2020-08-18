@@ -63,7 +63,7 @@ const CinemasMovieTimes = props => {
       <>
         {' '}
         {currentTime <= time ? (
-          <Link to="/movies">
+          <Link to={`/session/${movieTime.id}`}>
             <Badge color="" id={`movieTime${movieTime.id}`}>
               {' '}
               {movieTime.time.slice(0, -3)}
@@ -81,7 +81,7 @@ const CinemasMovieTimes = props => {
     ) : (
       <>
         {' '}
-        <Link to="/movies">
+        <Link to={`/session/${movieTime.id}`}>
           <Badge color="" id={`movieTime${movieTime.id}`}>
             {' '}
             {movieTime.time.slice(0, -3)}
@@ -116,7 +116,7 @@ const MovieMovieTimes = props => {
       <>
         {' '}
         {currentTime <= time ? (
-          <Link to="/movies">
+          <Link to={`/session/${movieTime.id}`}>
             <Badge color="" id={`movieTime${movieTime.id}`}>
               {' '}
               {movieTime.time.slice(0, -3)}
@@ -127,14 +127,14 @@ const MovieMovieTimes = props => {
         )}
         {currentTime <= time ? (
           <UncontrolledTooltip placement="right" target={`movieTime${movieTime.id}`}>
-            {`price: ${sortByPrice([...movieTime.prices])[0].price} $`}
+            {`Buy ticket (from ${sortByPrice([...movieTime.prices])[0].price}$)`}
           </UncontrolledTooltip>
         ) : null}
       </>
     ) : (
       <>
         {' '}
-        <Link to="/movies">
+        <Link to={`/session/${movieTime.id}`}>
           <Badge color="" id={`movieTime${movieTime.id}`}>
             {' '}
             {movieTime.time.slice(0, -3)}
