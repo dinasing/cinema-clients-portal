@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
-import { Container, Row, Col, Media } from 'reactstrap';
+import { Container, Media } from 'reactstrap';
 import moment from 'moment';
 import {
   getMovieById,
