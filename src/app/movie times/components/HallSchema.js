@@ -28,7 +28,7 @@ const Seats = props => {
       return (
         <>
           <Button
-            onClick={props.handleSelectSeat(rowIndex, seatIndex)}
+            onClick={props.handleSelectSeat(rowIndex, seatIndex, +row.seatsType)}
             color={
               selectedSeats.some(
                 selectedSeat => selectedSeat.row == rowIndex && selectedSeat.seat == seatIndex
