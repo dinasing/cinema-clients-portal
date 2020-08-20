@@ -56,12 +56,32 @@ const SeatTypes = props => {
   );
 };
 
+const BookSelectedSeatsButton = props => {
+  const { numberOfSeats, totalPrice } = props;
+  return (
+    <>
+      <p>
+        {numberOfSeats
+          ? numberOfSeats > 1
+            ? `${numberOfSeats} seats selected`
+            : `1 seat selected`
+          : null}
+      </p>
+      {numberOfSeats ? <p>total price: {totalPrice}$</p> : null}
+      <Button color="primary" disabled={!numberOfSeats}>
+        {numberOfSeats ? 'Book seats' : 'Select seats'}
+      </Button>
+    </>
+  );
+};
+
 class BookingContainer extends Component {
   constructor(props) {
     super(props);
 
     this.state = {
       selectedSeats: [],
+      totalPrice: 0,
     };
   }
 
@@ -71,22 +91,29 @@ class BookingContainer extends Component {
     });
   }
 
-  handleSelectSeat = (rowIndex, seatIndex) => () => {
-    const { selectedSeats } = this.state;
+  handleSelectSeat = (rowIndex, seatIndex, seatsType) => () => {
+    const { selectedSeats, totalPrice } = this.state;
+    const { movie_time_prices } = this.props.movieTime.movieTime;
+    const seatPrice = movie_time_prices.find(price => price.seatTypeId === seatsType).price;
 
-    this.setState({
-      selectedSeats: selectedSeats.some(
-        selectedSeat => selectedSeat.row == rowIndex && selectedSeat.seat == seatIndex
-      )
-        ? selectedSeats.filter(
-            selectedSeat => !(selectedSeat.row === rowIndex && selectedSeat.seat === seatIndex)
-          )
-        : [...selectedSeats, { row: rowIndex, seat: seatIndex }],
-    });
+    const newSeats = selectedSeats.some(
+      selectedSeat => selectedSeat.row == rowIndex && selectedSeat.seat == seatIndex
+    )
+      ? selectedSeats.filter(
+          selectedSeat => !(selectedSeat.row === rowIndex && selectedSeat.seat === seatIndex)
+        )
+      : [...selectedSeats, { row: rowIndex, seat: seatIndex, seatsType }];
+    const newPrice = selectedSeats.some(
+      selectedSeat => selectedSeat.row == rowIndex && selectedSeat.seat == seatIndex
+    )
+      ? totalPrice - +seatPrice
+      : totalPrice + +seatPrice;
+
+    this.setState({ selectedSeats: newSeats, totalPrice: newPrice });
   };
 
   render() {
-    const { selectedSeats } = this.state;
+    const { selectedSeats, totalPrice } = this.state;
     const {
       cinema_hall,
       date,
@@ -128,6 +155,7 @@ class BookingContainer extends Component {
                 seatTypes={seatTypes}
               />
             ) : null}
+            <BookSelectedSeatsButton numberOfSeats={selectedSeats.length} totalPrice={totalPrice} />
           </Col>
         </Row>
       </>
