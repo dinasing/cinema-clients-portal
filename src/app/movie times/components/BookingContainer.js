@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
-import { Container, Media } from 'reactstrap';
+import { Container, Media, Col, Row, Button, Badge } from 'reactstrap';
 import moment from 'moment';
 import HallSchema from '../../cinema hall/components/HallSchema';
 import { getMovieTimeById } from '../actions/movieTimeAction';
@@ -29,14 +29,64 @@ const MovieTimeInfoHeader = props => {
   ) : null;
 };
 
+const SeatTypes = props => {
+  const { seatTypes, movie_time_prices, schema } = props;
+  const hallsSeatTypes = Array.from(new Set(schema.map(row => +row.seatsType)));
+
+  return (
+    <>
+      {seatTypes
+        .filter(seatType => hallsSeatTypes.includes(seatType.id))
+        .map(seatType => (
+          <>
+            <h5>{seatType.title}</h5>
+            <p>
+              {' '}
+              <Button key={seatType.id} color="primary">
+                <Badge color="primary">
+                  {seatType.numberOfPeople === 1 ? 1 : <Container>1</Container>}
+                </Badge>
+              </Button>{' '}
+              {movie_time_prices.find(price => price.seatTypeId === seatType.id).price}$ for{' '}
+              {seatType.numberOfPeople === 1 ? '1 person' : `${seatType.numberOfPeople} persons`}
+            </p>
+          </>
+        ))}
+    </>
+  );
+};
+
 class BookingContainer extends Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      selectedSeats: [],
+    };
+  }
+
   async componentDidMount() {
     await this.props.getSeatTypes().then(() => {
       this.props.getMovieTimeById(this.props.match.params.session_id);
     });
   }
 
+  handleSelectSeat = (rowIndex, seatIndex) => () => {
+    const { selectedSeats } = this.state;
+
+    this.setState({
+      selectedSeats: selectedSeats.some(
+        selectedSeat => selectedSeat.row == rowIndex && selectedSeat.seat == seatIndex
+      )
+        ? selectedSeats.filter(
+            selectedSeat => !(selectedSeat.row === rowIndex && selectedSeat.seat === seatIndex)
+          )
+        : [...selectedSeats, { row: rowIndex, seat: seatIndex }],
+    });
+  };
+
   render() {
+    const { selectedSeats } = this.state;
     const {
       cinema_hall,
       date,
@@ -57,15 +107,29 @@ class BookingContainer extends Component {
     return (
       <>
         {movieTimeInfo ? <MovieTimeInfoHeader movieTimeInfo={movieTimeInfo} /> : null}
-        <Container>
-          {cinema_hall && seatTypes ? (
-            <HallSchema
-              schema={cinema_hall.schema}
-              hallTitle={cinema_hall.title}
-              seatTypes={seatTypes}
-            />
-          ) : null}
-        </Container>
+        <Row>
+          <Col lg="auto">
+            {cinema_hall && seatTypes ? (
+              <HallSchema
+                schema={cinema_hall.schema}
+                hallTitle={cinema_hall.title}
+                seatTypes={seatTypes}
+                bookedSeats={bookedSeats}
+                selectedSeats={selectedSeats}
+                handleSelectSeat={this.handleSelectSeat}
+              />
+            ) : null}
+          </Col>
+          <Col>
+            {cinema_hall && seatTypes && movie_time_prices ? (
+              <SeatTypes
+                schema={cinema_hall.schema}
+                movie_time_prices={movie_time_prices}
+                seatTypes={seatTypes}
+              />
+            ) : null}
+          </Col>
+        </Row>
       </>
     );
   }
