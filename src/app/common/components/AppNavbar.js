@@ -7,7 +7,7 @@ import { loadUser } from '../../auth/actions/authAction';
 
 const GuestLinks = () => {
   return (
-    <>
+    <Nav navbar>
       <NavItem>
         <Link to="/signup">Sign Up</Link>
       </NavItem>
@@ -16,7 +16,7 @@ const GuestLinks = () => {
           Sign In
         </Link>
       </NavItem>
-    </>
+    </Nav>
   );
 };
 
@@ -40,6 +40,8 @@ class AppNavbar extends Component {
               <Link to="/movie-theaters">Movie theaters</Link>
             </NavItem>
           </Nav>
+
+          {isAuthenticated ? null : <GuestLinks />}
         </Container>
       </Navbar>
     );
