@@ -3,9 +3,10 @@ import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import { Container, Media, Col, Row, Button, Badge } from 'reactstrap';
 import moment from 'moment';
-import HallSchema from '../../cinema hall/components/HallSchema';
+import HallSchema from './HallSchema';
 import { getMovieTimeById } from '../actions/movieTimeAction';
 import { getSeatTypes } from '../../seat type/actions/seatTypeAction';
+import { getBookedSeats, bookSeats } from '../actions/bookingAction';
 
 const MovieTimeInfoHeader = props => {
   const { date, time, movie, cinema } = props.movieTimeInfo;
@@ -68,7 +69,7 @@ const BookSelectedSeatsButton = props => {
           : null}
       </p>
       {numberOfSeats ? <p>total price: {totalPrice}$</p> : null}
-      <Button color="primary" disabled={!numberOfSeats}>
+      <Button color="primary" disabled={!numberOfSeats} onClick={props.handleSubmitSeatsForBooking}>
         {numberOfSeats ? 'Book seats' : 'Select seats'}
       </Button>
     </>
@@ -86,9 +87,10 @@ class BookingContainer extends Component {
   }
 
   async componentDidMount() {
-    await this.props.getSeatTypes().then(() => {
-      this.props.getMovieTimeById(this.props.match.params.session_id);
-    });
+    const { movie_time_id } = this.props.match.params;
+    await this.props.getSeatTypes();
+    await this.props.getBookedSeats(movie_time_id);
+    this.props.getMovieTimeById(movie_time_id);
   }
 
   handleSelectSeat = (rowIndex, seatIndex, seatsType) => () => {
@@ -102,7 +104,7 @@ class BookingContainer extends Component {
       ? selectedSeats.filter(
           selectedSeat => !(selectedSeat.row === rowIndex && selectedSeat.seat === seatIndex)
         )
-      : [...selectedSeats, { row: rowIndex, seat: seatIndex, seatsType }];
+      : [...selectedSeats, { row: rowIndex, seat: seatIndex, seatTypeId: seatsType }];
     const newPrice = selectedSeats.some(
       selectedSeat => selectedSeat.row == rowIndex && selectedSeat.seat == seatIndex
     )
@@ -110,6 +112,14 @@ class BookingContainer extends Component {
       : totalPrice + +seatPrice;
 
     this.setState({ selectedSeats: newSeats, totalPrice: newPrice });
+  };
+
+  handleSubmitSeatsForBooking = () => {
+    const { selectedSeats } = this.state;
+    const movieTimeId = this.props.match.params.movie_time_id;
+    const userId = this.props.auth.user.id;
+
+    this.props.bookSeats({ selectedSeats, movieTimeId, userId });
   };
 
   render() {
@@ -122,7 +132,7 @@ class BookingContainer extends Component {
       cinema,
       movie_time_prices,
     } = this.props.movieTime.movieTime;
-
+    const { bookedSeats } = this.props.movieTime;
     const { seatTypes } = this.props.seatType;
     const movieTimeInfo = {
       date,
@@ -136,7 +146,7 @@ class BookingContainer extends Component {
         {movieTimeInfo ? <MovieTimeInfoHeader movieTimeInfo={movieTimeInfo} /> : null}
         <Row>
           <Col lg="auto">
-            {cinema_hall && seatTypes ? (
+            {cinema_hall && seatTypes && bookedSeats ? (
               <HallSchema
                 schema={cinema_hall.schema}
                 hallTitle={cinema_hall.title}
@@ -155,7 +165,11 @@ class BookingContainer extends Component {
                 seatTypes={seatTypes}
               />
             ) : null}
-            <BookSelectedSeatsButton numberOfSeats={selectedSeats.length} totalPrice={totalPrice} />
+            <BookSelectedSeatsButton
+              handleSubmitSeatsForBooking={this.handleSubmitSeatsForBooking}
+              numberOfSeats={selectedSeats.length}
+              totalPrice={totalPrice}
+            />
           </Col>
         </Row>
       </>
@@ -168,11 +182,19 @@ BookingContainer.propTypes = {
   seatType: PropTypes.object.isRequired,
   getMovieTimeById: PropTypes.func.isRequired,
   getSeatTypes: PropTypes.func.isRequired,
+  getBookedSeats: PropTypes.func.isRequired,
+  bookSeats: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = state => ({
   movieTime: state.rootReducer.movieTime,
   seatType: state.rootReducer.seatType,
+  auth: state.rootReducer.auth,
 });
 
-export default connect(mapStateToProps, { getMovieTimeById, getSeatTypes })(BookingContainer);
+export default connect(mapStateToProps, {
+  getMovieTimeById,
+  getSeatTypes,
+  getBookedSeats,
+  bookSeats,
+})(BookingContainer);

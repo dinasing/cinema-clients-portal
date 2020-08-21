@@ -37,9 +37,13 @@ const Seats = props => {
                 : 'primary'
             }
             id={`hallTitle-${hallTitle}_row${rowIndex + 1}seat${seatIndex + 1}`}
-            disabled={bookedSeats.some(
-              bookedSeat => bookedSeat.row === rowIndex && bookedSeat.seat === seatIndex
-            )}
+            disabled={
+              bookedSeats
+                ? bookedSeats.some(
+                    bookedSeat => bookedSeat.row === rowIndex && bookedSeat.seat === seatIndex
+                  )
+                : false
+            }
           >
             <Badge
               color={
