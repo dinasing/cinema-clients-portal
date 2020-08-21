@@ -1,12 +1,12 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
-import { Container, Media, Col, Row, Button, Badge } from 'reactstrap';
+import { Container, Media, Col, Row, Button, Badge, Alert } from 'reactstrap';
 import moment from 'moment';
 import HallSchema from './HallSchema';
 import { getMovieTimeById } from '../actions/movieTimeAction';
 import { getSeatTypes } from '../../seat type/actions/seatTypeAction';
-import { getBookedSeats, bookSeats } from '../actions/bookingAction';
+import { getBookedSeats, bookSeats, cleanSeatsBookedByUser } from '../actions/bookingAction';
 
 const MovieTimeInfoHeader = props => {
   const { date, time, movie, cinema } = props.movieTimeInfo;
@@ -83,6 +83,7 @@ class BookingContainer extends Component {
     this.state = {
       selectedSeats: [],
       totalPrice: 0,
+      message: null,
     };
   }
 
@@ -114,16 +115,25 @@ class BookingContainer extends Component {
     this.setState({ selectedSeats: newSeats, totalPrice: newPrice });
   };
 
-  handleSubmitSeatsForBooking = () => {
+  handleSubmitSeatsForBooking = async () => {
     const { selectedSeats } = this.state;
     const movieTimeId = this.props.match.params.movie_time_id;
     const userId = this.props.auth.user.id;
 
-    this.props.bookSeats({ selectedSeats, movieTimeId, userId });
+    await this.props.bookSeats({ selectedSeats, movieTimeId, userId });
+    this.setState({ selectedSeats: [], totalPrice: 0 });
+  };
+
+  onDismissSuccessAlert = () => {
+    this.props.cleanSeatsBookedByUser();
+  };
+
+  onDismissErrorAlert = () => {
+    this.setState({ message: null });
   };
 
   render() {
-    const { selectedSeats, totalPrice } = this.state;
+    const { selectedSeats, totalPrice, message } = this.state;
     const {
       cinema_hall,
       date,
@@ -132,7 +142,7 @@ class BookingContainer extends Component {
       cinema,
       movie_time_prices,
     } = this.props.movieTime.movieTime;
-    const { bookedSeats } = this.props.movieTime;
+    const { bookedSeats, seatsBookedByUser } = this.props.movieTime;
     const { seatTypes } = this.props.seatType;
     const movieTimeInfo = {
       date,
@@ -144,6 +154,18 @@ class BookingContainer extends Component {
     return (
       <>
         {movieTimeInfo ? <MovieTimeInfoHeader movieTimeInfo={movieTimeInfo} /> : null}
+        <Alert isOpen={message} toggle={this.onDismissErrorAlert} color="danger">
+          {message}
+        </Alert>
+
+        <Alert
+          isOpen={seatsBookedByUser.length && !message}
+          toggle={this.onDismissSuccessAlert}
+          color="success"
+        >
+          Seats(s) were booked successfully!
+        </Alert>
+
         <Row>
           <Col lg="auto">
             {cinema_hall && seatTypes && bookedSeats ? (
@@ -154,6 +176,7 @@ class BookingContainer extends Component {
                 bookedSeats={bookedSeats}
                 selectedSeats={selectedSeats}
                 handleSelectSeat={this.handleSelectSeat}
+                seatsBookedByUser={seatsBookedByUser}
               />
             ) : null}
           </Col>
@@ -184,6 +207,7 @@ BookingContainer.propTypes = {
   getSeatTypes: PropTypes.func.isRequired,
   getBookedSeats: PropTypes.func.isRequired,
   bookSeats: PropTypes.func.isRequired,
+  cleanSeatsBookedByUser: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = state => ({
@@ -197,4 +221,5 @@ export default connect(mapStateToProps, {
   getSeatTypes,
   getBookedSeats,
   bookSeats,
+  cleanSeatsBookedByUser,
 })(BookingContainer);

@@ -4,6 +4,7 @@ import {
   GET_BOOKED_SEATS,
   BOOK_SEATS,
   BOOK_SEATS_FAIL,
+  CLEAN_SEATS_BOOKED_BY_USER,
 } from '../../common/actions/types';
 
 const initialState = {
@@ -11,8 +12,8 @@ const initialState = {
   movieTime: {},
   loading: false,
   bookedSeats: [],
-  seatsBookedByUser: [],
   message: null,
+  seatsBookedByUser: [],
 };
 
 export default function(state = initialState, action) {
@@ -38,9 +39,15 @@ export default function(state = initialState, action) {
       return {
         ...state,
         seatsBookedByUser: action.payload,
+        bookedSeats: state.bookedSeats.concat(action.payload),
       };
     case BOOK_SEATS_FAIL:
       return { ...state, message: 'Seats have not been booked. Please, try again.' };
+    case CLEAN_SEATS_BOOKED_BY_USER:
+      return {
+        ...state,
+        seatsBookedByUser: [],
+      };
     default:
       return state;
   }

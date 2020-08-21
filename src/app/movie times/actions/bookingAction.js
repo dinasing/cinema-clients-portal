@@ -1,5 +1,10 @@
 import axios from 'axios';
-import { GET_BOOKED_SEATS, BOOK_SEATS, BOOK_SEATS_FAIL } from '../../common/actions/types';
+import {
+  GET_BOOKED_SEATS,
+  BOOK_SEATS,
+  BOOK_SEATS_FAIL,
+  CLEAN_SEATS_BOOKED_BY_USER,
+} from '../../common/actions/types';
 import { returnErrors } from '../../common/actions/errorAction';
 import { tokenConfig } from '../../auth/actions/authAction';
 
@@ -17,13 +22,13 @@ export const getBookedSeats = id => async dispatch => {
     });
 };
 
-export const bookSeats = transaction => (dispatch, getState) => {
-  axios
+export const bookSeats = transaction => async (dispatch, getState) => {
+  await axios
     .post('/booking', transaction, tokenConfig(getState))
-    .then(res => {
+    .then(() => {
       dispatch({
         type: BOOK_SEATS,
-        payload: res.data,
+        payload: transaction.selectedSeats,
       });
     })
     .catch(err => {
@@ -34,4 +39,12 @@ export const bookSeats = transaction => (dispatch, getState) => {
         type: BOOK_SEATS_FAIL,
       });
     });
+};
+
+export const cleanSeatsBookedByUser = () => dispatch => {
+  dispatch(cleanSeatsBookedByUserEvent());
+};
+
+const cleanSeatsBookedByUserEvent = () => {
+  return { type: CLEAN_SEATS_BOOKED_BY_USER };
 };
