@@ -50,3 +50,5 @@ export const GET_BOOKED_SEATS = 'GET_BOOKED_SEATS';
 export const BOOK_SEATS = 'BOOK_SEATS';
 export const BOOK_SEATS_FAIL = 'BOOK_SEATS_FAIL';
 export const CLEAN_SEATS_BOOKED_BY_USER = 'CLEAN_SEATS_BOOKED_BY_USER';
+
+export const GET_GOODS = 'GET_GOODS';

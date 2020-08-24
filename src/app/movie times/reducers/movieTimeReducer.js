@@ -5,6 +5,7 @@ import {
   BOOK_SEATS,
   BOOK_SEATS_FAIL,
   CLEAN_SEATS_BOOKED_BY_USER,
+  GET_GOODS,
 } from '../../common/actions/types';
 
 const initialState = {
@@ -14,6 +15,7 @@ const initialState = {
   bookedSeats: [],
   message: null,
   seatsBookedByUser: [],
+  additionalGoods: [],
 };
 
 export default function(state = initialState, action) {
@@ -47,6 +49,11 @@ export default function(state = initialState, action) {
       return {
         ...state,
         seatsBookedByUser: [],
+      };
+    case GET_GOODS:
+      return {
+        ...state,
+        additionalGoods: [].concat(action.payload),
       };
     default:
       return state;

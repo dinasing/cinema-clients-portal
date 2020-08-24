@@ -3,7 +3,7 @@ import {
   GET_BOOKED_SEATS,
   BOOK_SEATS,
   BOOK_SEATS_FAIL,
-  CLEAN_SEATS_BOOKED_BY_USER,
+  CLEAN_SEATS_BOOKED_BY_USER, GET_GOODS
 } from '../../common/actions/types';
 import { returnErrors } from '../../common/actions/errorAction';
 import { tokenConfig } from '../../auth/actions/authAction';
@@ -48,3 +48,13 @@ export const cleanSeatsBookedByUser = () => dispatch => {
 const cleanSeatsBookedByUserEvent = () => {
   return { type: CLEAN_SEATS_BOOKED_BY_USER };
 };
+
+export const getAdditionalGoods = cinemaId => dispatch => {
+  axios.get(`/additional-goods/${cinemaId}`).then(res =>
+    dispatch({
+      type: GET_GOODS,
+      payload: res.data,
+    })
+  );
+};
+
