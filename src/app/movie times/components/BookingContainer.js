@@ -2,11 +2,15 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import { Container, Media, Col, Row, Button, Badge, Alert } from 'reactstrap';
+import io from 'socket.io-client';
+
 import moment from 'moment';
 import HallSchema from './HallSchema';
 import { getMovieTimeById } from '../actions/movieTimeAction';
 import { getSeatTypes } from '../../seat type/actions/seatTypeAction';
 import { getBookedSeats, bookSeats, cleanSeatsBookedByUser } from '../actions/bookingAction';
+
+const socket = io('http://localhost:3000');
 
 const MovieTimeInfoHeader = props => {
   const { date, time, movie, cinema } = props.movieTimeInfo;
@@ -85,6 +89,12 @@ class BookingContainer extends Component {
       totalPrice: 0,
       message: null,
     };
+
+    const { movie_time_id } = this.props.match.params;
+    socket.emit('get-seats', movie_time_id);
+    socket.on('booked-seats', bookedSeats => {
+      this.setState({ seatsToBookByOthers: bookedSeats });
+    });
   }
 
   async componentDidMount() {
@@ -97,15 +107,32 @@ class BookingContainer extends Component {
   handleSelectSeat = (rowIndex, seatIndex, seatsType) => () => {
     const { selectedSeats, totalPrice } = this.state;
     const { movie_time_prices } = this.props.movieTime.movieTime;
-    const seatPrice = movie_time_prices.find(price => price.seatTypeId === seatsType).price;
 
-    const newSeats = selectedSeats.some(
-      selectedSeat => selectedSeat.row == rowIndex && selectedSeat.seat == seatIndex
-    )
-      ? selectedSeats.filter(
-          selectedSeat => !(selectedSeat.row === rowIndex && selectedSeat.seat === seatIndex)
-        )
-      : [...selectedSeats, { row: rowIndex, seat: seatIndex, seatTypeId: seatsType }];
+    const movieTimeId = this.props.match.params.movie_time_id;
+    const userId = 'this.props.auth.user.id';
+
+    const seatPrice = movie_time_prices.find(price => price.seatTypeId === seatsType).price;
+    let newSeats = [];
+
+    if (
+      selectedSeats.some(
+        selectedSeat => selectedSeat.row == rowIndex && selectedSeat.seat == seatIndex
+      )
+    ) {
+      newSeats = selectedSeats.filter(
+        selectedSeat => !(selectedSeat.row === rowIndex && selectedSeat.seat === seatIndex)
+      );
+      socket.emit('delete-seat-from-booked', {
+        row: rowIndex,
+        seat: seatIndex,
+        userId,
+        movieTimeId,
+      });
+    } else {
+      newSeats = [...selectedSeats, { row: rowIndex, seat: seatIndex, seatTypeId: seatsType }];
+      socket.emit('book-seat', { row: rowIndex, seat: seatIndex, userId, movieTimeId });
+    }
+
     const newPrice = selectedSeats.some(
       selectedSeat => selectedSeat.row == rowIndex && selectedSeat.seat == seatIndex
     )
@@ -133,7 +160,7 @@ class BookingContainer extends Component {
   };
 
   render() {
-    const { selectedSeats, totalPrice, message } = this.state;
+    const { selectedSeats, totalPrice, message, seatsToBookByOthers } = this.state;
     const {
       cinema_hall,
       date,
@@ -173,7 +200,7 @@ class BookingContainer extends Component {
                 schema={cinema_hall.schema}
                 hallTitle={cinema_hall.title}
                 seatTypes={seatTypes}
-                bookedSeats={bookedSeats}
+                bookedSeats={bookedSeats.concat(seatsToBookByOthers)}
                 selectedSeats={selectedSeats}
                 handleSelectSeat={this.handleSelectSeat}
                 seatsBookedByUser={seatsBookedByUser}
