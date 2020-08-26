@@ -10,6 +10,7 @@ import { getMovieTimeById } from '../actions/movieTimeAction';
 import { getSeatTypes } from '../../seat type/actions/seatTypeAction';
 import { getBookedSeats, bookSeats, cleanSeatsBookedByUser } from '../actions/bookingAction';
 import Login from '../../auth/components/Login';
+import { AdditionalGoodsList } from './AdditionalGoodsList';
 
 const socket = io('http://localhost:3000');
 
@@ -63,7 +64,7 @@ const SeatTypes = props => {
 };
 
 const BookSelectedSeatsButton = props => {
-  const { numberOfSeats, totalPrice } = props;
+  const { numberOfSeats, seatsPrice } = props;
   return (
     <>
       <p>
@@ -73,7 +74,7 @@ const BookSelectedSeatsButton = props => {
             : `1 seat selected`
           : null}
       </p>
-      {numberOfSeats ? <p>total price: {totalPrice}$</p> : null}
+      {numberOfSeats ? <p>total price: {seatsPrice}$</p> : null}
       <Button color="primary" disabled={!numberOfSeats} onClick={props.handleSubmitSeatsForBooking}>
         {numberOfSeats ? 'Book seats' : 'Select seats'}
       </Button>
@@ -87,9 +88,11 @@ class BookingContainer extends Component {
 
     this.state = {
       selectedSeats: [],
-      totalPrice: 0,
+      seatsPrice: 0,
       message: null,
       showLoginModal: false,
+      selectedAdditionalGoods: [],
+      totalPrice: 0,
     };
 
     const { movie_time_id } = this.props.match.params;
@@ -103,7 +106,15 @@ class BookingContainer extends Component {
     const { movie_time_id } = this.props.match.params;
     await this.props.getSeatTypes();
     await this.props.getBookedSeats(movie_time_id);
-    this.props.getMovieTimeById(movie_time_id);
+    await this.props.getMovieTimeById(movie_time_id).then(() => {
+      const { movie_time_additional_goods_prices } = this.props.movieTime.movieTime;
+      this.setState({
+        selectedAdditionalGoods: movie_time_additional_goods_prices.map(price => ({
+          id: price.additionalGoodId,
+          number: 0,
+        })),
+      });
+    });
   }
 
   componentDidUpdate(prevProps) {
@@ -115,7 +126,7 @@ class BookingContainer extends Component {
   handleSelectSeat = (rowIndex, seatIndex, seatsType) => () => {
     const { isAuthenticated } = this.props.auth;
     if (isAuthenticated) {
-      const { selectedSeats, totalPrice } = this.state;
+      const { selectedSeats, seatsPrice } = this.state;
       const { movie_time_prices } = this.props.movieTime.movieTime;
 
       const movieTimeId = this.props.match.params.movie_time_id;
@@ -146,10 +157,10 @@ class BookingContainer extends Component {
       const newPrice = selectedSeats.some(
         selectedSeat => selectedSeat.row == rowIndex && selectedSeat.seat == seatIndex
       )
-        ? totalPrice - +seatPrice
-        : totalPrice + +seatPrice;
+        ? seatsPrice - +seatPrice
+        : seatsPrice + +seatPrice;
 
-      this.setState({ selectedSeats: newSeats, totalPrice: newPrice });
+      this.setState({ selectedSeats: newSeats, seatsPrice: newPrice });
     } else {
       this.showLoginModal();
     }
@@ -165,7 +176,7 @@ class BookingContainer extends Component {
     const userId = this.props.auth.user.id;
 
     await this.props.bookSeats({ selectedSeats, movieTimeId, userId });
-    this.setState({ selectedSeats: [], totalPrice: 0 });
+    this.setState({ selectedSeats: [], seatsPrice: 0 });
   };
 
   onDismissSuccessAlert = () => {
@@ -176,8 +187,40 @@ class BookingContainer extends Component {
     this.setState({ message: null });
   };
 
+  handleAddAdditionalGoodsToTicket = id => () => {
+    const { selectedAdditionalGoods } = this.state;
+    const newAdditionalGoods = selectedAdditionalGoods.find(goods => goods.id == id);
+    newAdditionalGoods.number += 1;
+    this.setState({
+      selectedAdditionalGoods: [
+        ...selectedAdditionalGoods.filter(goods => goods.id !== id),
+        newAdditionalGoods,
+      ],
+    });
+  };
+
+  handleRemoveAdditionalGoodsFromTicket = id => () => {
+    const { selectedAdditionalGoods } = this.state;
+    const newAdditionalGoods = selectedAdditionalGoods.find(goods => goods.id === id);
+    newAdditionalGoods.number = newAdditionalGoods.number ? newAdditionalGoods.number - 1 : 0;
+    this.setState({
+      selectedAdditionalGoods: [
+        ...selectedAdditionalGoods.filter(goods => goods.id !== id),
+        newAdditionalGoods,
+      ],
+    });
+  };
+
   render() {
-    const { selectedSeats, totalPrice, message, seatsToBookByOthers, showLoginModal } = this.state;
+    const {
+      selectedSeats,
+      totalPrice,
+      seatsPrice,
+      message,
+      selectedAdditionalGoods,
+      seatsToBookByOthers,
+      showLoginModal,
+    } = this.state;
     const {
       cinema_hall,
       date,
@@ -185,8 +228,19 @@ class BookingContainer extends Component {
       movie,
       cinema,
       movie_time_prices,
+      movie_time_additional_goods_prices,
     } = this.props.movieTime.movieTime;
     const { bookedSeats, seatsBookedByUser } = this.props.movieTime;
+
+    const additionalGoods = movie_time_additional_goods_prices
+      ? movie_time_additional_goods_prices.map(price => ({
+          id: price.additionalGoodId,
+          price: price.price,
+          title: price.additional_good.title,
+          image: price.additional_good.image,
+          description: price.additional_good.description,
+        }))
+      : [];
     const { seatTypes } = this.props.seatType;
     const movieTimeInfo = {
       date,
@@ -238,10 +292,18 @@ class BookingContainer extends Component {
             <BookSelectedSeatsButton
               handleSubmitSeatsForBooking={this.handleSubmitSeatsForBooking}
               numberOfSeats={selectedSeats.length}
-              totalPrice={totalPrice}
+              seatsPrice={seatsPrice}
             />
           </Col>
         </Row>
+        {additionalGoods ? (
+          <AdditionalGoodsList
+            additionalGoods={additionalGoods}
+            selectedAdditionalGoods={selectedAdditionalGoods}
+            handleAddAdditionalGoodsToTicket={this.handleAddAdditionalGoodsToTicket}
+            handleRemoveAdditionalGoodsFromTicket={this.handleRemoveAdditionalGoodsFromTicket}
+          />
+        ) : null}
       </>
     );
   }

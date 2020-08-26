@@ -128,9 +128,9 @@ export const getMoviesForCinema = id => dispatch => {
     });
 };
 
-export const getMovieTimeById = id => dispatch => {
+export const getMovieTimeById = id => async dispatch => {
   dispatch(setMovieTimeLoading());
-  axios
+  await axios
     .get('/movie-time/' + id)
     .then(response =>
       dispatch({
