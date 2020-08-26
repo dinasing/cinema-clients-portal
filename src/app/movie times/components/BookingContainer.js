@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
-import { Container, Media, Col, Row, Button, Badge, Alert } from 'reactstrap';
+import { Container, Media, Col, Row, Button, Badge, Alert, Modal } from 'reactstrap';
 import io from 'socket.io-client';
 
 import moment from 'moment';
@@ -9,6 +9,7 @@ import HallSchema from './HallSchema';
 import { getMovieTimeById } from '../actions/movieTimeAction';
 import { getSeatTypes } from '../../seat type/actions/seatTypeAction';
 import { getBookedSeats, bookSeats, cleanSeatsBookedByUser } from '../actions/bookingAction';
+import Login from '../../auth/components/Login';
 
 const socket = io('http://localhost:3000');
 
@@ -88,6 +89,7 @@ class BookingContainer extends Component {
       selectedSeats: [],
       totalPrice: 0,
       message: null,
+      showLoginModal: false,
     };
 
     const { movie_time_id } = this.props.match.params;
@@ -104,42 +106,57 @@ class BookingContainer extends Component {
     this.props.getMovieTimeById(movie_time_id);
   }
 
+  componentDidUpdate(prevProps) {
+    if (!prevProps.auth.isAuthenticated && this.props.auth.isAuthenticated) {
+      this.setState({ showLoginModal: false });
+    }
+  }
+
   handleSelectSeat = (rowIndex, seatIndex, seatsType) => () => {
-    const { selectedSeats, totalPrice } = this.state;
-    const { movie_time_prices } = this.props.movieTime.movieTime;
+    const { isAuthenticated } = this.props.auth;
+    if (isAuthenticated) {
+      const { selectedSeats, totalPrice } = this.state;
+      const { movie_time_prices } = this.props.movieTime.movieTime;
 
-    const movieTimeId = this.props.match.params.movie_time_id;
-    const userId = 'this.props.auth.user.id';
+      const movieTimeId = this.props.match.params.movie_time_id;
+      const userId = 'this.props.auth.user.id';
 
-    const seatPrice = movie_time_prices.find(price => price.seatTypeId === seatsType).price;
-    let newSeats = [];
+      const seatPrice = movie_time_prices.find(price => price.seatTypeId === seatsType).price;
+      let newSeats = [];
 
-    if (
-      selectedSeats.some(
+      if (
+        selectedSeats.some(
+          selectedSeat => selectedSeat.row == rowIndex && selectedSeat.seat == seatIndex
+        )
+      ) {
+        newSeats = selectedSeats.filter(
+          selectedSeat => !(selectedSeat.row === rowIndex && selectedSeat.seat === seatIndex)
+        );
+        socket.emit('delete-seat-from-booked', {
+          row: rowIndex,
+          seat: seatIndex,
+          userId,
+          movieTimeId,
+        });
+      } else {
+        newSeats = [...selectedSeats, { row: rowIndex, seat: seatIndex, seatTypeId: seatsType }];
+        socket.emit('book-seat', { row: rowIndex, seat: seatIndex, userId, movieTimeId });
+      }
+
+      const newPrice = selectedSeats.some(
         selectedSeat => selectedSeat.row == rowIndex && selectedSeat.seat == seatIndex
       )
-    ) {
-      newSeats = selectedSeats.filter(
-        selectedSeat => !(selectedSeat.row === rowIndex && selectedSeat.seat === seatIndex)
-      );
-      socket.emit('delete-seat-from-booked', {
-        row: rowIndex,
-        seat: seatIndex,
-        userId,
-        movieTimeId,
-      });
+        ? totalPrice - +seatPrice
+        : totalPrice + +seatPrice;
+
+      this.setState({ selectedSeats: newSeats, totalPrice: newPrice });
     } else {
-      newSeats = [...selectedSeats, { row: rowIndex, seat: seatIndex, seatTypeId: seatsType }];
-      socket.emit('book-seat', { row: rowIndex, seat: seatIndex, userId, movieTimeId });
+      this.showLoginModal();
     }
+  };
 
-    const newPrice = selectedSeats.some(
-      selectedSeat => selectedSeat.row == rowIndex && selectedSeat.seat == seatIndex
-    )
-      ? totalPrice - +seatPrice
-      : totalPrice + +seatPrice;
-
-    this.setState({ selectedSeats: newSeats, totalPrice: newPrice });
+  showLoginModal = () => {
+    this.setState({ showLoginModal: true });
   };
 
   handleSubmitSeatsForBooking = async () => {
@@ -160,7 +177,7 @@ class BookingContainer extends Component {
   };
 
   render() {
-    const { selectedSeats, totalPrice, message, seatsToBookByOthers } = this.state;
+    const { selectedSeats, totalPrice, message, seatsToBookByOthers, showLoginModal } = this.state;
     const {
       cinema_hall,
       date,
@@ -180,6 +197,9 @@ class BookingContainer extends Component {
 
     return (
       <>
+        <Modal isOpen={showLoginModal}>
+          <Login />
+        </Modal>
         {movieTimeInfo ? <MovieTimeInfoHeader movieTimeInfo={movieTimeInfo} /> : null}
         <Alert isOpen={message} toggle={this.onDismissErrorAlert} color="danger">
           {message}
