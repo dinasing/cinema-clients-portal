@@ -3,12 +3,17 @@ import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import { Container, Media, Col, Row, Button, Badge, Alert, Modal } from 'reactstrap';
 import io from 'socket.io-client';
-
+import { Link } from 'react-router-dom';
 import moment from 'moment';
 import HallSchema from './HallSchema';
 import { getMovieTimeById } from '../actions/movieTimeAction';
 import { getSeatTypes } from '../../seat type/actions/seatTypeAction';
-import { getBookedSeats, bookSeats, cleanSeatsBookedByUser } from '../actions/bookingAction';
+import {
+  getBookedSeats,
+  bookSeats,
+  cleanSeatsBookedByUser,
+  prepareSeatsForBooking,
+} from '../actions/bookingAction';
 import Login from '../../auth/components/Login';
 import { AdditionalGoodsList } from './AdditionalGoodsList';
 
@@ -75,9 +80,29 @@ const BookSelectedSeatsButton = props => {
           : null}
       </p>
       {numberOfSeats ? <p>total price: {seatsPrice}$</p> : null}
-      <Button color="primary" disabled={!numberOfSeats} onClick={props.handleSubmitSeatsForBooking}>
+      <Button
+        outline
+        color="primary"
+        disabled={!numberOfSeats}
+        onClick={props.handleSubmitSeatsForBooking}
+        size="lg"
+        block
+      >
         {numberOfSeats ? 'Book seats' : 'Select seats'}
       </Button>
+    </>
+  );
+};
+
+const AddAdditionalGoodsButton = props => {
+  return (
+    <>
+      {' '}
+      <Link to="/additional-goods">
+        <Button color="primary" onClick={props.handleAddAdditionalGoods} size="lg" block>
+          Add snack to ticket
+        </Button>{' '}
+      </Link>
     </>
   );
 };
@@ -106,15 +131,7 @@ class BookingContainer extends Component {
     const { movie_time_id } = this.props.match.params;
     await this.props.getSeatTypes();
     await this.props.getBookedSeats(movie_time_id);
-    await this.props.getMovieTimeById(movie_time_id).then(() => {
-      const { movie_time_additional_goods_prices } = this.props.movieTime.movieTime;
-      this.setState({
-        selectedAdditionalGoods: movie_time_additional_goods_prices.map(price => ({
-          id: price.additionalGoodId,
-          number: 0,
-        })),
-      });
-    });
+    await this.props.getMovieTimeById(movie_time_id);
   }
 
   componentDidUpdate(prevProps) {
@@ -187,40 +204,13 @@ class BookingContainer extends Component {
     this.setState({ message: null });
   };
 
-  handleAddAdditionalGoodsToTicket = id => () => {
-    const { selectedAdditionalGoods } = this.state;
-    const newAdditionalGoods = selectedAdditionalGoods.find(goods => goods.id == id);
-    newAdditionalGoods.number += 1;
-    this.setState({
-      selectedAdditionalGoods: [
-        ...selectedAdditionalGoods.filter(goods => goods.id !== id),
-        newAdditionalGoods,
-      ],
-    });
-  };
-
-  handleRemoveAdditionalGoodsFromTicket = id => () => {
-    const { selectedAdditionalGoods } = this.state;
-    const newAdditionalGoods = selectedAdditionalGoods.find(goods => goods.id === id);
-    newAdditionalGoods.number = newAdditionalGoods.number ? newAdditionalGoods.number - 1 : 0;
-    this.setState({
-      selectedAdditionalGoods: [
-        ...selectedAdditionalGoods.filter(goods => goods.id !== id),
-        newAdditionalGoods,
-      ],
-    });
+  handleAddAdditionalGoods = async () => {
+    const { selectedSeats } = this.state;
+    await this.props.prepareSeatsForBooking(selectedSeats);
   };
 
   render() {
-    const {
-      selectedSeats,
-      totalPrice,
-      seatsPrice,
-      message,
-      selectedAdditionalGoods,
-      seatsToBookByOthers,
-      showLoginModal,
-    } = this.state;
+    const { selectedSeats, seatsPrice, message, seatsToBookByOthers, showLoginModal } = this.state;
     const {
       cinema_hall,
       date,
@@ -232,15 +222,6 @@ class BookingContainer extends Component {
     } = this.props.movieTime.movieTime;
     const { bookedSeats, seatsBookedByUser } = this.props.movieTime;
 
-    const additionalGoods = movie_time_additional_goods_prices
-      ? movie_time_additional_goods_prices.map(price => ({
-          id: price.additionalGoodId,
-          price: price.price,
-          title: price.additional_good.title,
-          image: price.additional_good.image,
-          description: price.additional_good.description,
-        }))
-      : [];
     const { seatTypes } = this.props.seatType;
     const movieTimeInfo = {
       date,
@@ -294,16 +275,12 @@ class BookingContainer extends Component {
               numberOfSeats={selectedSeats.length}
               seatsPrice={seatsPrice}
             />
+            <br />
+            {movie_time_additional_goods_prices && selectedSeats.length ? (
+              <AddAdditionalGoodsButton handleAddAdditionalGoods={this.handleAddAdditionalGoods} />
+            ) : null}
           </Col>
         </Row>
-        {additionalGoods ? (
-          <AdditionalGoodsList
-            additionalGoods={additionalGoods}
-            selectedAdditionalGoods={selectedAdditionalGoods}
-            handleAddAdditionalGoodsToTicket={this.handleAddAdditionalGoodsToTicket}
-            handleRemoveAdditionalGoodsFromTicket={this.handleRemoveAdditionalGoodsFromTicket}
-          />
-        ) : null}
       </>
     );
   }
@@ -317,6 +294,7 @@ BookingContainer.propTypes = {
   getBookedSeats: PropTypes.func.isRequired,
   bookSeats: PropTypes.func.isRequired,
   cleanSeatsBookedByUser: PropTypes.func.isRequired,
+  prepareSeatsForBooking: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = state => ({
@@ -331,4 +309,5 @@ export default connect(mapStateToProps, {
   getBookedSeats,
   bookSeats,
   cleanSeatsBookedByUser,
+  prepareSeatsForBooking,
 })(BookingContainer);
