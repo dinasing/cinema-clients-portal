@@ -111,19 +111,19 @@ class BookingContainer extends Component {
   constructor(props) {
     super(props);
 
-    this.state = {
-      selectedSeats: [],
-      seatsPrice: 0,
-      message: null,
-      showLoginModal: false,
-      selectedAdditionalGoods: [],
-      totalPrice: 0,
-    };
+    this.state = { selectedSeats: [], seatsPrice: 0, message: null, showLoginModal: false };
 
+    const userId = this.props.auth.isAuthenticated ? this.props.auth.user.id : undefined;
     const { movie_time_id } = this.props.match.params;
     socket.emit('get-seats', movie_time_id);
     socket.on('booked-seats', bookedSeats => {
-      this.setState({ seatsToBookByOthers: bookedSeats });
+      const seatsSelectedByUser = userId ? bookedSeats.filter(seat => seat.userId == userId) : [];
+      const seatsToBookByOthers = bookedSeats.filter(seat => seat.userId !== userId);
+
+      this.setState({
+        seatsToBookByOthers,
+        selectedSeats: seatsSelectedByUser,
+      });
     });
   }
 
