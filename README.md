@@ -1,1 +1,1 @@
-# cinema-client-client
+# cinema-clients-portal
