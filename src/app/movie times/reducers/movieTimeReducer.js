@@ -6,6 +6,8 @@ import {
   BOOK_SEATS_FAIL,
   CLEAN_SEATS_BOOKED_BY_USER,
   GET_GOODS,
+  PREPARE_SEATS_FOR_BOOKING,
+  REMOVE_SEATS_PREPARED_FOR_BOOKING,
 } from '../../common/actions/types';
 
 const initialState = {
@@ -16,6 +18,7 @@ const initialState = {
   message: null,
   seatsBookedByUser: [],
   additionalGoods: [],
+  seatsPreparedForBooking: [],
 };
 
 export default function(state = initialState, action) {
@@ -54,6 +57,16 @@ export default function(state = initialState, action) {
       return {
         ...state,
         additionalGoods: [].concat(action.payload),
+      };
+    case PREPARE_SEATS_FOR_BOOKING:
+      return {
+        ...state,
+        seatsPreparedForBooking: [].concat(action.payload),
+      };
+    case REMOVE_SEATS_PREPARED_FOR_BOOKING:
+      return {
+        ...state,
+        seatsPreparedForBooking: [],
       };
     default:
       return state;

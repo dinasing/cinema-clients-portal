@@ -5,6 +5,8 @@ import {
   BOOK_SEATS_FAIL,
   CLEAN_SEATS_BOOKED_BY_USER,
   GET_GOODS,
+  PREPARE_SEATS_FOR_BOOKING,
+  REMOVE_SEATS_PREPARED_FOR_BOOKING,
 } from '../../common/actions/types';
 import { returnErrors } from '../../common/actions/errorAction';
 import { tokenConfig } from '../../auth/actions/authAction';
@@ -40,6 +42,19 @@ export const bookSeats = transaction => async (dispatch, getState) => {
         type: BOOK_SEATS_FAIL,
       });
     });
+};
+const removePreparedSeats = () => {
+  return { type: REMOVE_SEATS_PREPARED_FOR_BOOKING };
+};
+
+export const prepareSeatsForBooking = seats => async dispatch => {
+  setTimeout(() => {
+    dispatch(removePreparedSeats());
+  }, 300000);
+  await dispatch({
+    type: PREPARE_SEATS_FOR_BOOKING,
+    payload: seats,
+  });
 };
 
 export const cleanSeatsBookedByUser = () => dispatch => {
