@@ -32,15 +32,17 @@ const GoodsCard = props => {
       <CardFooter>
         <Row>
           <Col>
-            <Button color="primary" onClick={props.handleAddAdditionalGoodsToTicket(id)}>
+            <Button color="primary" block onClick={props.handleAddAdditionalGoodsToTicket(id)}>
               <h5>+</h5>
             </Button>
           </Col>
           <Col>
-            <Container>{number}</Container>
+            <Container>
+              <h4>{number}</h4>
+            </Container>
           </Col>
           <Col>
-            <Button color="warning" onClick={props.handleRemoveAdditionalGoodsFromTicket(id)}>
+            <Button block color="warning" onClick={props.handleRemoveAdditionalGoodsFromTicket(id)}>
               <h5>-</h5>
             </Button>
           </Col>
@@ -54,7 +56,7 @@ export const AdditionalGoodsList = props => {
   const { additionalGoods, selectedAdditionalGoods } = props;
 
   return (
-    <Row lg="5" sm="3" xs="1">
+    <Row lg="2" xs="1">
       {additionalGoods.map(goods => (
         <GoodsCard
           number={
