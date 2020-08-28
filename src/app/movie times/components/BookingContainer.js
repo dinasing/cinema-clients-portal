@@ -188,11 +188,17 @@ class BookingContainer extends Component {
   };
 
   handleSubmitSeatsForBooking = async () => {
-    const { selectedSeats } = this.state;
+    const { selectedSeats: seatsPreparedForBooking } = this.state;
     const movieTimeId = this.props.match.params.movie_time_id;
     const userId = this.props.auth.user.id;
+    const additionalGoods = [];
 
-    await this.props.bookSeats({ selectedSeats, movieTimeId, userId });
+    await this.props.bookSeats({
+      seatsPreparedForBooking,
+      movieTimeId,
+      userId,
+      additionalGoods,
+    });
     this.setState({ selectedSeats: [], seatsPrice: 0 });
   };
 
@@ -208,6 +214,10 @@ class BookingContainer extends Component {
     const { selectedSeats } = this.state;
     await this.props.prepareSeatsForBooking(selectedSeats);
   };
+
+  componentWillUnmount() {
+    socket.close();
+  }
 
   render() {
     const { selectedSeats, seatsPrice, message, seatsToBookByOthers, showLoginModal } = this.state;

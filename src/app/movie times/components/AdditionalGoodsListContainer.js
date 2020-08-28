@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { Container, Col, Row, Button, Alert } from 'reactstrap';
+import { bookSeats } from '../actions/bookingAction';
 import { AdditionalGoodsList } from './AdditionalGoodsList';
 
 const SelectedSeat = props => {
@@ -50,6 +51,14 @@ const SelectedAdditionalGood = props => {
       </Row>
     </>
   ) : null;
+};
+
+const BookSeatsButton = props => {
+  return (
+    <Button color="primary" onClick={props.handleSubmitSeatsForBooking} size="lg" block>
+      Book seats
+    </Button>
+  );
 };
 
 const TotalCost = props => {
@@ -120,6 +129,10 @@ const TotalCostContainer = props => {
         selectedAdditionalGoods={selectedAdditionalGoods}
         seatsPreparedForBooking={seatsPreparedForBooking}
       />
+      <BookSeatsButton
+        selectedAdditionalGoods={selectedAdditionalGoods}
+        handleSubmitSeatsForBooking={props.handleSubmitSeatsForBooking}
+      />
     </>
   );
 };
@@ -167,6 +180,21 @@ class AdditionalGoodsListContainer extends Component {
     });
   };
 
+  handleSubmitSeatsForBooking = async () => {
+    const { seatsPreparedForBooking, movieTime: {id} } = this.props.movieTime;
+    const { selectedAdditionalGoods } = this.state;
+    const movieTimeId = id;
+    const userId = this.props.auth.user.id;
+    const additionalGoods = selectedAdditionalGoods.filter(goods => goods.number !== 0);
+
+    await this.props.bookSeats({
+      seatsPreparedForBooking,
+      movieTimeId,
+      userId,
+      additionalGoods,
+    });
+  };
+
   render() {
     const {
       movie_time_additional_goods_prices,
@@ -206,6 +234,7 @@ class AdditionalGoodsListContainer extends Component {
               selectedAdditionalGoods={selectedAdditionalGoods}
               seatsPreparedForBooking={seatsPreparedForBooking}
               seatTypes={seatTypes}
+              handleSubmitSeatsForBooking={this.handleSubmitSeatsForBooking}
             />
           </Col>
         </Row>
@@ -218,6 +247,7 @@ AdditionalGoodsListContainer.propTypes = {
   movieTime: PropTypes.object.isRequired,
   seatType: PropTypes.object.isRequired,
   auth: PropTypes.object.isRequired,
+  bookSeats: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = state => ({
@@ -226,4 +256,4 @@ const mapStateToProps = state => ({
   auth: state.rootReducer.auth,
 });
 
-export default connect(mapStateToProps, {})(AdditionalGoodsListContainer);
+export default connect(mapStateToProps, { bookSeats })(AdditionalGoodsListContainer);

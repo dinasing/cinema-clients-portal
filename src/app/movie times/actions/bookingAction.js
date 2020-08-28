@@ -31,16 +31,13 @@ export const bookSeats = transaction => async (dispatch, getState) => {
     .then(() => {
       dispatch({
         type: BOOK_SEATS,
-        payload: transaction.selectedSeats,
+        payload: transaction.seatsPreparedForBooking,
       });
     })
     .catch(err => {
       if (err.response) {
         dispatch(returnErrors(err.response.data, err.response.status, 'BOOK_SEATS_FAIL'));
       }
-      dispatch({
-        type: BOOK_SEATS_FAIL,
-      });
     });
 };
 const removePreparedSeats = () => {
