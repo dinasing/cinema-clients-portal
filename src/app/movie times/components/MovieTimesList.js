@@ -116,7 +116,7 @@ const MovieMovieTimes = props => {
       <>
         {' '}
         {currentTime <= time ? (
-          <Link to="/movies">
+          <Link to={`/movies/`}>
             <Badge color="" id={`movieTime${movieTime.id}`}>
               {' '}
               {movieTime.time.slice(0, -3)}
@@ -150,7 +150,7 @@ const MovieMovieTimes = props => {
   return (
     <Row>
       <Col>
-        <Link to={`/movie-theaters/${cinemaId}`}>{title}</Link>
+        <Link to={`/movies/${movieId}`}>{title}</Link>
       </Col>
       <Col>{timesBadges}</Col>
     </Row>
