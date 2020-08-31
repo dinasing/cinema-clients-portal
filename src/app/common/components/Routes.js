@@ -24,6 +24,8 @@ class Routes extends Component {
         <Route exact path="/movies" component={Movies} store={store} />
         <Route exact path="/movies/:movie_id" component={Movie} store={store} />
 
+        <ProtectedRoute exact path="/user/:id/tickets" component={Movie} store={store} />
+
         <Route path="*" component={() => '404 NOT FOUND'} />
       </Switch>
     );

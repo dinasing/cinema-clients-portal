@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Button, ButtonDropdown, DropdownToggle, DropdownMenu, DropdownItem } from 'reactstrap';
+import { ButtonDropdown, DropdownToggle, DropdownMenu, DropdownItem } from 'reactstrap';
 import Logout from '../../auth/components/Logout';
+import { TicketsNavItem } from '../../user/components/TicketsNavItem';
 
 const Example = props => {
   const [dropdownOpen, setOpen] = useState(false);
@@ -15,6 +16,10 @@ const Example = props => {
         {user.firstName} {user.lastName}
       </DropdownToggle>
       <DropdownMenu>
+        {' '}
+        <DropdownItem>
+          <TicketsNavItem userId={user.id} />
+        </DropdownItem>
         <DropdownItem divider />
         <DropdownItem>
           <Logout />
