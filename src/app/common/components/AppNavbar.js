@@ -4,10 +4,11 @@ import { Navbar, NavbarBrand, Nav, NavItem, Container } from 'reactstrap';
 import { Link, withRouter } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { loadUser } from '../../auth/actions/authAction';
+import MenuButtonDropdown from './MenuButtonDropdown';
 
 const GuestLinks = () => {
   return (
-    <>
+    <Nav navbar>
       <NavItem>
         <Link to="/signup">Sign Up</Link>
       </NavItem>
@@ -16,7 +17,18 @@ const GuestLinks = () => {
           Sign In
         </Link>
       </NavItem>
-    </>
+    </Nav>
+  );
+};
+
+const UsersLinks = props => {
+  const { user } = props;
+  return (
+    <Nav navbar>
+      <NavItem>
+        <MenuButtonDropdown user={user} />
+      </NavItem>{' '}
+    </Nav>
   );
 };
 
@@ -40,6 +52,7 @@ class AppNavbar extends Component {
               <Link to="/movie-theaters">Movie theaters</Link>
             </NavItem>
           </Nav>
+          {isAuthenticated ? <UsersLinks user={user} /> : <GuestLinks />}
         </Container>
       </Navbar>
     );
