@@ -12,7 +12,7 @@ import {
 import { returnErrors, clearErrors } from '../../common/actions/errorAction';
 import { tokenConfig } from '../../auth/actions/authAction';
 
-const apiKey = '5886c0d8ba5d3a8a90ea37b8b1dc8ca1';
+const apiKey = process.env.API_KEY;
 
 export const getMovies = () => dispatch => {
   dispatch(setMoviesLoading());
