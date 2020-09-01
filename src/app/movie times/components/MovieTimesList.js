@@ -63,20 +63,20 @@ const CinemasMovieTimes = props => {
       <>
         {' '}
         {currentTime <= time ? (
-          <Link to="/movies">
-            <Badge color="" id={`movieTime${movieTime.id}`}>
-              {' '}
-              {movieTime.time.slice(0, -3)}
-            </Badge>
-          </Link>
+          <>
+            <Link to="/movies">
+              <Badge color="" id={`movieTime${movieTime.id}`}>
+                {' '}
+                {movieTime.time.slice(0, -3)}
+              </Badge>
+            </Link>
+            <UncontrolledTooltip placement="right" target={`movieTime${movieTime.id}`}>
+              {`price: ${sortByPrice([...movieTime.prices])[0].price} $`}
+            </UncontrolledTooltip>
+          </>
         ) : (
           <Badge id={`movieTime${movieTime.id}`}> {movieTime.time.slice(0, -3)}</Badge>
         )}
-        {currentTime <= time ? (
-          <UncontrolledTooltip placement="right" target={`movieTime${movieTime.id}`}>
-            {`price: ${sortByPrice([...movieTime.prices])[0].price} $`}
-          </UncontrolledTooltip>
-        ) : null}
       </>
     ) : (
       <>
@@ -116,24 +116,23 @@ const MovieMovieTimes = props => {
       <>
         {' '}
         {currentTime <= time ? (
-          <Link to="/movies">
-            <Badge color="" id={`movieTime${movieTime.id}`}>
-              {' '}
-              {movieTime.time.slice(0, -3)}
-            </Badge>
-          </Link>
+          <>
+            <Link to="/movies">
+              <Badge color="" id={`movieTime${movieTime.id}`}>
+                {' '}
+                {movieTime.time.slice(0, -3)}
+              </Badge>
+            </Link>
+            <UncontrolledTooltip placement="right" target={`movieTime${movieTime.id}`}>
+              {`price: ${sortByPrice([...movieTime.prices])[0].price} $`}
+            </UncontrolledTooltip>
+          </>
         ) : (
           <Badge id={`movieTime${movieTime.id}`}> {movieTime.time.slice(0, -3)}</Badge>
         )}
-        {currentTime <= time ? (
-          <UncontrolledTooltip placement="right" target={`movieTime${movieTime.id}`}>
-            {`price: ${sortByPrice([...movieTime.prices])[0].price} $`}
-          </UncontrolledTooltip>
-        ) : null}
       </>
     ) : (
       <>
-        {' '}
         <Link to="/movies">
           <Badge color="" id={`movieTime${movieTime.id}`}>
             {' '}
