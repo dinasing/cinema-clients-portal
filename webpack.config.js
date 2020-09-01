@@ -1,5 +1,6 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const Dotenv = require('dotenv-webpack');
 
 module.exports = {
   entry: './src/index.js',
@@ -8,7 +9,8 @@ module.exports = {
     filename: 'bundle.js',
   },
   resolve: {
-    extensions: ['.js, .jsx'],
+    extensions: ['.js', '.jsx', '.json'],
+    modules: ['src', 'node_modules'],
   },
   module: {
     rules: [
@@ -73,9 +75,6 @@ module.exports = {
       },
     ],
   },
-  resolve: {
-    extensions: ['.js', '.jsx'],
-  },
 
   devServer: {
     inline: true,
@@ -87,5 +86,6 @@ module.exports = {
     new HtmlWebpackPlugin({
       template: 'public/index.html',
     }),
+    new Dotenv({ safe: true }),
   ],
 };
