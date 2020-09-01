@@ -9,10 +9,9 @@ import {
   GET_GENRES_FAIL,
   GET_GENRES,
 } from '../../common/actions/types';
-import { returnErrors, clearErrors } from '../../common/actions/errorAction';
-import { tokenConfig } from '../../auth/actions/authAction';
+import { returnErrors } from '../../common/actions/errorAction';
 
-const apiKey = process.env.API_KEY;
+const apiKey = process.env.MOVIE_DB_API_KEY;
 
 export const getMovies = () => dispatch => {
   dispatch(setMoviesLoading());
