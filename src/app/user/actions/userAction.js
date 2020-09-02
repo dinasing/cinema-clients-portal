@@ -10,7 +10,7 @@ export const setLoading = () => {
 export const getBookings = userId => dispatch => {
   dispatch(setLoading());
   axios
-    .get(`/booking/user/${userId}`)
+    .get(`/booking/user/${userId}`, tokenConfig())
     .then(response =>
       dispatch({
         type: GET_USERS_BOOKINGS,
