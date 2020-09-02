@@ -6,7 +6,7 @@ export const TicketsNavItem = props => {
 
   return (
     <>
-      <NavLink href={`/user/${userId}/tickets`}>Tickets</NavLink>
+      <NavLink href={`/users/${userId}/tickets`}>Tickets</NavLink>
     </>
   );
 };
