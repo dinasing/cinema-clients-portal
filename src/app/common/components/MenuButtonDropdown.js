@@ -11,8 +11,8 @@ const Example = props => {
   const { user } = props;
 
   return (
-    <ButtonDropdown direction="left" isOpen={dropdownOpen} toggle={toggle}>
-      <DropdownToggle color="link" caret>
+    <ButtonDropdown direction="left" isOpen={dropdownOpen} toggle={toggle} nav inNavbar>
+      <DropdownToggle nav color="link" caret>
         {user.firstName} {user.lastName}
       </DropdownToggle>
       <DropdownMenu>

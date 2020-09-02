@@ -23,13 +23,7 @@ const GuestLinks = () => {
 
 const UsersLinks = props => {
   const { user } = props;
-  return (
-    <Nav navbar>
-      <NavItem>
-        <MenuButtonDropdown user={user} />
-      </NavItem>{' '}
-    </Nav>
-  );
+  return <MenuButtonDropdown user={user} />;
 };
 
 class AppNavbar extends Component {

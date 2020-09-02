@@ -1,12 +1,12 @@
 import React from 'react';
-import { NavLink } from 'reactstrap';
-
+import { NavItem, NavLink } from 'reactstrap';
+import { Link } from 'react-router-dom';
 export const TicketsNavItem = props => {
   const { userId } = props;
 
   return (
-    <>
-      <NavLink href={`/users/${userId}/tickets`}>Tickets</NavLink>
-    </>
+    <NavItem>
+      <Link to={`/users/${userId}/tickets`}>Tickets</Link>
+    </NavItem>
   );
 };
