@@ -31,10 +31,8 @@ const Booking = props => {
         <Row>
           <Col>
             <Container>
-              {' '}
-              <CardTitle>
-                <h4>{movie_time.movie.title}</h4>
-              </CardTitle>
+              <br />
+              <h4>{movie_time.movie.title}</h4>
               <h4>{movie_time.cinema.title}</h4>
               <p>Hall "{movie_time.cinema_hall.title}"</p>
               <p>
@@ -59,7 +57,28 @@ const Booking = props => {
                     ).price
                   }
                 />
-              ))}
+              ))}{' '}
+            </Table>
+            <Table>
+              {purchased_additional_goods.length ? (
+                <>
+                  <tr>
+                    <th>snack</th>
+                    <th>amount</th>
+                    <th>price</th>
+                  </tr>
+                  {purchased_additional_goods.map(goods => (
+                    <AdditionalGoods
+                      goods={goods}
+                      price={
+                        movie_time.movie_time_additional_goods_prices.find(
+                          price => price.additionalGoodId === goods.additionalGoodId
+                        ).price
+                      }
+                    />
+                  ))}
+                </>
+              ) : null}
             </Table>
           </Col>
         </Row>
@@ -80,7 +99,22 @@ const Ticket = props => {
       <td>{row + 1}</td>
       <td>{seat + 1}</td>
       <td>{seat_type.title}</td>
-      <td>{price}</td>
+      <td>{price}$</td>
+    </tr>
+  );
+};
+
+const AdditionalGoods = props => {
+  const {
+    goods: { number, additional_good },
+    price,
+  } = props;
+
+  return (
+    <tr>
+      <td>{additional_good.title}</td>
+      <td>x{number}</td>
+      <td>{price * number}$</td>
     </tr>
   );
 };
