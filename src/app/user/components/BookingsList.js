@@ -25,6 +25,23 @@ const Booking = props => {
     booking: { movie_time, tickets, purchased_additional_goods },
   } = props;
 
+  const totalPrice = tickets.reduce(
+    (sum, ticket) =>
+      (sum += movie_time.movie_time_prices.find(price => price.seatTypeId === ticket.seatTypeId)
+        .price),
+    0
+  );
+  const goodsPrice = purchased_additional_goods.length
+    ? purchased_additional_goods.reduce(
+        (sum, goods) =>
+          (sum +=
+            movie_time.movie_time_additional_goods_prices.find(
+              price => price.additionalGoodId === goods.additionalGoodId
+            ).price * goods.number),
+        0
+      )
+    : 0;
+
   return (
     <>
       <Card>
@@ -58,13 +75,12 @@ const Booking = props => {
                   }
                 />
               ))}{' '}
-            </Table>
-            <Table>
               {purchased_additional_goods.length ? (
                 <>
                   <tr>
                     <th>snack</th>
                     <th>amount</th>
+                    <th></th>
                     <th>price</th>
                   </tr>
                   {purchased_additional_goods.map(goods => (
@@ -79,6 +95,10 @@ const Booking = props => {
                   ))}
                 </>
               ) : null}
+              <th>total price</th>
+              <th></th>
+              <th></th>
+              <th>{totalPrice + goodsPrice}$</th>
             </Table>
           </Col>
         </Row>
@@ -114,6 +134,7 @@ const AdditionalGoods = props => {
     <tr>
       <td>{additional_good.title}</td>
       <td>x{number}</td>
+      <td></td>
       <td>{price * number}$</td>
     </tr>
   );
