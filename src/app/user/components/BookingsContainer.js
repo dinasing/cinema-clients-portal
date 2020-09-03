@@ -24,7 +24,7 @@ export class BookingContainer extends Component {
 
   filterBookings(bookings, filter) {
     const currentTime = new Date().getTime();
-    const currentDate = new Date();
+    const currentDate = new Date().setHours(0, 0, 0, 0);
 
     switch (filter) {
       case 'all':
@@ -47,18 +47,26 @@ export class BookingContainer extends Component {
               new Date().setUTCHours(
                 booking.movie_time.time.slice(0, 2),
                 booking.movie_time.time.slice(3, 5)
-              ) <= currentTime)
+              ) < currentTime)
         );
       default:
         return [];
     }
   }
 
+  sortByDate(array) {
+    return array.sort((a, b) =>
+      new Date(a.movie_time.date) > new Date(b.movie_time.date) ? 1 : -1
+    );
+  }
+
   render() {
     const { bookings, loading } = this.props.user;
     const { filter } = this.state;
 
-    const filteredBookings = bookings.length ? this.filterBookings(bookings, filter) : [];
+    const filteredBookings = bookings.length
+      ? this.filterBookings(this.sortByDate(bookings), filter)
+      : [];
 
     return (
       <>
