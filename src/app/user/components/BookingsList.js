@@ -12,8 +12,8 @@ const BookingsList = props => {
         bookings.map(booking => <Booking booking={booking} />)
       ) : (
         <p>
-          You did not book tickets yet. Go to
-          <Link to="/movies">Movies</Link> to find out what is in the box office right now.
+          You did not book tickets yet. Go to <Link to="/movies">Movies</Link> to find out what is
+          in the box office right now.
         </p>
       )}
     </>

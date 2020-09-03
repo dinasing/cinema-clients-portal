@@ -1,21 +1,76 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
+import { Input } from 'reactstrap';
 import { getBookings } from '../../user/actions/userAction';
 import BookingsList from './BookingsList';
 
 export class BookingContainer extends Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      filter: 'future',
+    };
+  }
+
   componentDidMount() {
     this.props.getBookings(this.props.match.params.id);
   }
 
+  handleFilterChange = e => {
+    this.setState({ filter: e.target.value });
+  };
+
+  filterBookings(bookings, filter) {
+    const currentTime = new Date().getTime();
+    const currentDate = new Date();
+
+    switch (filter) {
+      case 'all':
+        return bookings;
+      case 'future':
+        return bookings.filter(
+          booking =>
+            new Date(booking.movie_time.date) > currentDate ||
+            (new Date(booking.movie_time.date) === currentDate &&
+              new Date().setUTCHours(
+                booking.movie_time.time.slice(0, 2),
+                booking.movie_time.time.slice(3, 5)
+              ) >= currentTime)
+        );
+      case 'past':
+        return bookings.filter(
+          booking =>
+            new Date(booking.movie_time.date) < currentDate ||
+            (new Date(booking.movie_time.date) === currentDate &&
+              new Date().setUTCHours(
+                booking.movie_time.time.slice(0, 2),
+                booking.movie_time.time.slice(3, 5)
+              ) <= currentTime)
+        );
+      default:
+        return [];
+    }
+  }
+
   render() {
     const { bookings, loading } = this.props.user;
+    const { filter } = this.state;
+
+    const filteredBookings = bookings.length ? this.filterBookings(bookings, filter) : [];
 
     return (
       <>
-        <h3>Your tickets</h3>
-        {loading ? 'Loading ...' : <BookingsList bookings={bookings} />}
+        <h3>Your tickets </h3>
+        <Input type="select" onChange={this.handleFilterChange}>
+          <option value="future" defaultValue>
+            future
+          </option>
+          <option value="past">past</option>
+          <option value="all">all</option>
+        </Input>
+        {loading ? 'Loading ...' : <BookingsList bookings={filteredBookings} />}
       </>
     );
   }
