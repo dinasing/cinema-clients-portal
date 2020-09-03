@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
-import { Container, Media, Col, Row, Button, Badge, Alert, Modal } from 'reactstrap';
+import { Container, Media, Col, Row, Button, Badge, Alert, Modal, ModalHeader } from 'reactstrap';
 import io from 'socket.io-client';
 import { Link } from 'react-router-dom';
 import moment from 'moment';
@@ -187,6 +187,12 @@ class BookingContainer extends Component {
     this.setState({ showLoginModal: true });
   };
 
+  toggle = () => {
+    this.setState(prevState => ({
+      showLoginModal: !prevState.showLoginModal,
+    }));
+  };
+
   handleSubmitSeatsForBooking = async () => {
     const { selectedSeats: seatsPreparedForBooking } = this.state;
     const movieTimeId = this.props.match.params.movie_time_id;
@@ -243,6 +249,7 @@ class BookingContainer extends Component {
     return (
       <>
         <Modal isOpen={showLoginModal}>
+          <ModalHeader toggle={this.toggle}></ModalHeader>
           <Login />
         </Modal>
         {movieTimeInfo ? <MovieTimeInfoHeader movieTimeInfo={movieTimeInfo} /> : null}
