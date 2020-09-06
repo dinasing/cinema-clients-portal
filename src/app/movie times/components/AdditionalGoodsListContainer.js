@@ -1,9 +1,12 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
+import io from 'socket.io-client';
 import { Container, Col, Row, Button, Alert } from 'reactstrap';
 import { bookSeats } from '../actions/bookingAction';
 import { AdditionalGoodsList } from './AdditionalGoodsList';
+
+const socket = io('http://localhost:3000');
 
 const SelectedSeat = props => {
   const {
@@ -56,7 +59,7 @@ const SelectedAdditionalGood = props => {
 const BookSeatsButton = props => {
   return (
     <Button color="primary" onClick={props.handleSubmitSeatsForBooking} size="lg" block>
-      Book seats
+      Book
     </Button>
   );
 };
@@ -143,6 +146,7 @@ class AdditionalGoodsListContainer extends Component {
 
     this.state = {
       selectedAdditionalGoods: [],
+      message: null,
     };
   }
 
@@ -154,6 +158,10 @@ class AdditionalGoodsListContainer extends Component {
         number: 0,
       })),
     });
+  }
+
+  componentWillUnmount() {
+    socket.close();
   }
 
   handleAddAdditionalGoodsToTicket = id => () => {
@@ -181,7 +189,10 @@ class AdditionalGoodsListContainer extends Component {
   };
 
   handleSubmitSeatsForBooking = async () => {
-    const { seatsPreparedForBooking, movieTime: {id} } = this.props.movieTime;
+    const {
+      seatsPreparedForBooking,
+      movieTime: { id },
+    } = this.props.movieTime;
     const { selectedAdditionalGoods } = this.state;
     const movieTimeId = id;
     const userId = this.props.auth.user.id;
@@ -193,6 +204,24 @@ class AdditionalGoodsListContainer extends Component {
       userId,
       additionalGoods,
     });
+
+    seatsPreparedForBooking.forEach(seat => {
+      socket.emit('delete-seat-from-booked', {
+        row: seat.row,
+        seat: seat.seat,
+        userId,
+        movieTimeId,
+      });
+    });
+  };
+
+  onDismissErrorAlert = () => {
+    this.setState({ message: null });
+  };
+
+  onDismissSuccessAlert = () => {
+    const { id } = this.props.movieTime.movieTime;
+    window.location.href = `/session/${id}`;
   };
 
   render() {
@@ -200,8 +229,9 @@ class AdditionalGoodsListContainer extends Component {
       movie_time_additional_goods_prices,
       movie_time_prices,
     } = this.props.movieTime.movieTime;
-    const { seatsPreparedForBooking } = this.props.movieTime;
-    const { selectedAdditionalGoods } = this.state;
+
+    const { seatsPreparedForBooking, seatsBookedByUser } = this.props.movieTime;
+    const { selectedAdditionalGoods, message } = this.state;
     const { seatTypes } = this.props.seatType;
 
     const additionalGoods = movie_time_additional_goods_prices
@@ -217,6 +247,17 @@ class AdditionalGoodsListContainer extends Component {
     return (
       <>
         <h4>add snack to your ticket</h4>
+        <Alert isOpen={message} toggle={this.onDismissErrorAlert} color="danger">
+          {message}
+        </Alert>
+        <Alert
+          isOpen={seatsBookedByUser.length && !message}
+          toggle={this.onDismissSuccessAlert}
+          color="success"
+        >
+          Booking successfully completed!
+        </Alert>
+
         <Row>
           <Col>
             <AdditionalGoodsList
