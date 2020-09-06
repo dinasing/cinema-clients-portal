@@ -37,6 +37,9 @@ export const bookSeats = transaction => async (dispatch, getState) => {
     .catch(err => {
       if (err.response) {
         dispatch(returnErrors(err.response.data, err.response.status, 'BOOK_SEATS_FAIL'));
+        dispatch({
+          type: BOOK_SEATS_FAIL,
+        });
       }
     });
 };
