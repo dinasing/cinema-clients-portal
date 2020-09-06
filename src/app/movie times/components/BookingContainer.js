@@ -88,7 +88,7 @@ const BookSelectedSeatsButton = props => {
         size="lg"
         block
       >
-        {numberOfSeats ? 'Book seats' : 'Select seats'}
+        {numberOfSeats ? 'Book' : 'Select seat'}
       </Button>
     </>
   );
@@ -113,10 +113,10 @@ class BookingContainer extends Component {
 
     this.state = { selectedSeats: [], seatsPrice: 0, message: null, showLoginModal: false };
 
-    const userId = this.props.auth.isAuthenticated ? this.props.auth.user.id : undefined;
     const { movie_time_id } = this.props.match.params;
     socket.emit('get-seats', movie_time_id);
     socket.on('booked-seats', bookedSeats => {
+      const userId = this.props.auth.isAuthenticated ? this.props.auth.user.id : null;
       const seatsSelectedByUser = userId ? bookedSeats.filter(seat => seat.userId == userId) : [];
       const seatsToBookByOthers = bookedSeats.filter(seat => seat.userId !== userId);
 
@@ -147,7 +147,7 @@ class BookingContainer extends Component {
       const { movie_time_prices } = this.props.movieTime.movieTime;
 
       const movieTimeId = this.props.match.params.movie_time_id;
-      const userId = 'this.props.auth.user.id';
+      const userId = this.props.auth.user.id;
 
       const seatPrice = movie_time_prices.find(price => price.seatTypeId === seatsType).price;
       let newSeats = [];
@@ -205,6 +205,16 @@ class BookingContainer extends Component {
       userId,
       additionalGoods,
     });
+
+    seatsPreparedForBooking.forEach(seat => {
+      socket.emit('delete-seat-from-booked', {
+        row: seat.row,
+        seat: seat.seat,
+        userId,
+        movieTimeId,
+      });
+    });
+
     this.setState({ selectedSeats: [], seatsPrice: 0 });
   };
 
@@ -253,6 +263,7 @@ class BookingContainer extends Component {
           <Login />
         </Modal>
         {movieTimeInfo ? <MovieTimeInfoHeader movieTimeInfo={movieTimeInfo} /> : null}
+        <br />
         <Alert isOpen={message} toggle={this.onDismissErrorAlert} color="danger">
           {message}
         </Alert>
@@ -262,7 +273,7 @@ class BookingContainer extends Component {
           toggle={this.onDismissSuccessAlert}
           color="success"
         >
-          Seats(s) were booked successfully!
+          Booking successfully completed!
         </Alert>
 
         <Row>
