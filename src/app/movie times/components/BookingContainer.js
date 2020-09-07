@@ -15,7 +15,6 @@ import {
   prepareSeatsForBooking,
 } from '../actions/bookingAction';
 import Login from '../../auth/components/Login';
-import { AdditionalGoodsList } from './AdditionalGoodsList';
 
 const socket = io('http://localhost:3000');
 
@@ -70,6 +69,8 @@ const SeatTypes = props => {
 
 const BookSelectedSeatsButton = props => {
   const { numberOfSeats, seatsPrice } = props;
+  const { id } = props;
+
   return (
     <>
       <p>
@@ -80,16 +81,18 @@ const BookSelectedSeatsButton = props => {
           : null}
       </p>
       {numberOfSeats ? <p>total price: {seatsPrice}$</p> : null}
-      <Button
-        outline
-        color="primary"
-        disabled={!numberOfSeats}
-        onClick={props.handleSubmitSeatsForBooking}
-        size="lg"
-        block
-      >
-        {numberOfSeats ? 'Book' : 'Select seat'}
-      </Button>
+      <Link to={`${id}/payment`} disabled={!numberOfSeats}>
+        <Button
+          outline
+          color="primary"
+          disabled={!numberOfSeats}
+          onClick={props.prepareSeats}
+          size="lg"
+          block
+        >
+          {numberOfSeats ? 'Buy' : 'Select seat'}
+        </Button>
+      </Link>
     </>
   );
 };
@@ -99,7 +102,7 @@ const AddAdditionalGoodsButton = props => {
     <>
       {' '}
       <Link to="/additional-goods">
-        <Button color="primary" onClick={props.handleAddAdditionalGoods} size="lg" block>
+        <Button color="primary" onClick={props.prepareSeats} size="lg" block>
           Add snack to ticket
         </Button>{' '}
       </Link>
@@ -226,7 +229,7 @@ class BookingContainer extends Component {
     this.setState({ message: null });
   };
 
-  handleAddAdditionalGoods = async () => {
+  prepareSeats = async () => {
     const { selectedSeats } = this.state;
     await this.props.prepareSeatsForBooking(selectedSeats);
   };
@@ -248,6 +251,7 @@ class BookingContainer extends Component {
     } = this.props.movieTime.movieTime;
     const { bookedSeats, seatsBookedByUser } = this.props.movieTime;
 
+    const { movie_time_id } = this.props.match.params;
     const { seatTypes } = this.props.seatType;
     const movieTimeInfo = {
       date,
@@ -299,13 +303,14 @@ class BookingContainer extends Component {
               />
             ) : null}
             <BookSelectedSeatsButton
-              handleSubmitSeatsForBooking={this.handleSubmitSeatsForBooking}
+              prepareSeats={this.prepareSeats}
               numberOfSeats={selectedSeats.length}
               seatsPrice={seatsPrice}
+              id={movie_time_id}
             />
             <br />
             {movie_time_additional_goods_prices && selectedSeats.length ? (
-              <AddAdditionalGoodsButton handleAddAdditionalGoods={this.handleAddAdditionalGoods} />
+              <AddAdditionalGoodsButton prepareSeats={this.prepareSeats} />
             ) : null}
           </Col>
         </Row>
