@@ -9,6 +9,7 @@ import Movies from '../../movie/components/MovieList';
 import Movie from '../../movie/components/Movie';
 import BookingContainer from '../../movie times/components/BookingContainer';
 import AdditionalGoodsListContainer from '../../movie times/components/AdditionalGoodsListContainer';
+import PaymentContainer from '../../movie times/components/PaymentContainer';
 
 class Routes extends Component {
   render() {
@@ -29,6 +30,13 @@ class Routes extends Component {
         <Route exact path="/movies/:movie_id" component={Movie} store={store} />
 
         <Route exact path="/session/:movie_time_id" component={BookingContainer} store={store} />
+
+        <ProtectedRoute
+          exact
+          path="/session/:movie_time_id/payment"
+          component={PaymentContainer}
+          store={store}
+        />
 
         <Route
           exact
