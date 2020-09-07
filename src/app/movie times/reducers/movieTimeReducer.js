@@ -8,6 +8,8 @@ import {
   GET_GOODS,
   PREPARE_SEATS_FOR_BOOKING,
   REMOVE_SEATS_PREPARED_FOR_BOOKING,
+  PREPARE_GOODS,
+  CLEAN_PREPARED_GOODS,
 } from '../../common/actions/types';
 
 const initialState = {
@@ -19,6 +21,7 @@ const initialState = {
   seatsBookedByUser: [],
   additionalGoods: [],
   seatsPreparedForBooking: [],
+  additionalGoodsPreparedForPayment: [],
 };
 
 export default function(state = initialState, action) {
@@ -67,6 +70,16 @@ export default function(state = initialState, action) {
       return {
         ...state,
         seatsPreparedForBooking: [],
+      };
+    case PREPARE_GOODS:
+      return {
+        ...state,
+        additionalGoodsPreparedForPayment: action.payload,
+      };
+    case CLEAN_PREPARED_GOODS:
+      return {
+        ...state,
+        additionalGoodsPreparedForPayment: [],
       };
     default:
       return state;
