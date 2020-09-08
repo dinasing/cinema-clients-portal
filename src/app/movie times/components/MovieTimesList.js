@@ -24,8 +24,8 @@ const MovieTimeCard = props => {
   const { date, cinemas, movies } = props.movieTime;
   const MovieTimes = cinemas
     ? cinemas.map(cinema => <CinemasMovieTimes date={date} cinema={cinema} />)
-    : movies
-    ? movies.map(movie => <MovieMovieTimes date={date} movie={movie} />)
+      : movies
+      ? movies.map(movie => <MovieMovieTimes date={date} movie={movie} />)
     : null;
 
   return (
