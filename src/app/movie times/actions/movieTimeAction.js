@@ -9,7 +9,6 @@ import {
   GET_SEATS_TYPES_FOR_MOVIE_TIMES,
 } from '../../common/actions/types';
 import { returnErrors } from '../../common/actions/errorAction';
-import { tokenConfig } from '../../auth/actions/authAction';
 
 export const getMovieTimes = () => dispatch => {
   dispatch(setMovieTimeLoading());
@@ -22,7 +21,9 @@ export const getMovieTimes = () => dispatch => {
       })
     )
     .catch(error => {
-      if (error.response) dispatch(returnErrors(error.response.data, error.response.status));
+      if (error.response) {
+        dispatch(returnErrors(error.response.data, error.response.status));
+      }
     });
 };
 
@@ -48,8 +49,11 @@ export const getCinemas = () => dispatch => {
       });
     })
     .catch(error => {
-      if (error.response) dispatch(returnErrors(error.response.data, error.response.status));
-      else dispatch(returnErrors(error.message));
+      if (error.response) {
+        dispatch(returnErrors(error.response.data, error.response.status));
+      } else {
+        dispatch(returnErrors(error.message));
+      }
     });
 };
 
@@ -63,8 +67,11 @@ export const getCinemaHalls = () => dispatch => {
       });
     })
     .catch(error => {
-      if (error.response) dispatch(returnErrors(error.response.data, error.response.status));
-      else dispatch(returnErrors(error.message));
+      if (error.response) {
+        dispatch(returnErrors(error.response.data, error.response.status));
+      } else {
+        dispatch(returnErrors(error.message));
+      }
     });
 };
 
@@ -78,8 +85,11 @@ export const getCinemaHallsForCinema = cinemaId => dispatch => {
       });
     })
     .catch(error => {
-      if (error.response) dispatch(returnErrors(error.response.data, error.response.status));
-      else dispatch(returnErrors(error.message));
+      if (error.response) {
+        dispatch(returnErrors(error.response.data, error.response.status));
+      } else {
+        dispatch(returnErrors(error.message));
+      }
     });
 };
 
@@ -93,8 +103,11 @@ export const getSeatsTypes = () => dispatch => {
       });
     })
     .catch(error => {
-      if (error.response) dispatch(returnErrors(error.response.data, error.response.status));
-      else dispatch(returnErrors(error.message));
+      if (error.response) {
+        dispatch(returnErrors(error.response.data, error.response.status));
+      } else {
+        dispatch(returnErrors(error.message));
+      }
     });
 };
 
@@ -108,8 +121,11 @@ export const getMovieTimesForCinema = id => dispatch => {
       });
     })
     .catch(error => {
-      if (error.response) dispatch(returnErrors(error.response.data, error.response.status));
-      else dispatch(returnErrors(error.message));
+      if (error.response) {
+        dispatch(returnErrors(error.response.data, error.response.status));
+      } else {
+        dispatch(returnErrors(error.message));
+      }
     });
 };
 
@@ -123,8 +139,11 @@ export const getMoviesForCinema = id => dispatch => {
       });
     })
     .catch(error => {
-      if (error.response) dispatch(returnErrors(error.response.data, error.response.status));
-      else dispatch(returnErrors(error.message));
+      if (error.response) {
+        dispatch(returnErrors(error.response.data, error.response.status));
+      } else {
+        dispatch(returnErrors(error.message));
+      }
     });
 };
 
