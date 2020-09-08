@@ -11,13 +11,11 @@ import {
   AUTH_ERROR,
 } from '../../common/actions/types';
 
-export const tokenConfig = () => {
+export const tokenConfig = config => {
   const token = localStorage.getItem('token');
 
-  const config = {
-    headers: {
-      'Content-type': 'application/json',
-    },
+  config.headers = {
+    'Content-type': 'application/json',
   };
 
   if (token) {
@@ -34,11 +32,12 @@ export const loadUser = () => (dispatch, getState) => {
   axios
     .get('/user/profile')
     .then(response => {
-      if (getState().rootReducer.auth.token)
+      if (getState().rootReducer.auth.token) {
         dispatch({
           type: USER_LOADED,
           payload: response.data,
         });
+      }
     })
     .catch(error => {
       dispatch(returnErrors(error.response.data, error.response.status, 'AUTH_FAIL'));
@@ -55,16 +54,10 @@ export const logout = () => {
 };
 
 export const register = ({ firstName, lastName, email, password }) => dispatch => {
-  const config = {
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  };
-
   const body = JSON.stringify({ firstName, lastName, email, password });
 
   axios
-    .post('/auth/signup', body, config)
+    .post('/auth/signup', body)
     .then(response =>
       dispatch({
         type: REGISTER_SUCCESS,
@@ -80,16 +73,10 @@ export const register = ({ firstName, lastName, email, password }) => dispatch =
 };
 
 export const login = ({ email, password }) => dispatch => {
-  const config = {
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  };
-
   const body = JSON.stringify({ email, password });
 
   axios
-    .post('/auth/login', body, config)
+    .post('/auth/login', body)
     .then(response =>
       dispatch({
         type: LOGIN_SUCCESS,
