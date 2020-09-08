@@ -27,10 +27,12 @@ export const tokenConfig = () => {
   return config;
 };
 
+axios.interceptors.request.use(tokenConfig);
+
 export const loadUser = () => (dispatch, getState) => {
   dispatch({ type: USER_LOADING });
   axios
-    .get('/user/profile', tokenConfig())
+    .get('/user/profile')
     .then(response => {
       if (getState().rootReducer.auth.token)
         dispatch({
