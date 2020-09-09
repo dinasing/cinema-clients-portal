@@ -1,8 +1,6 @@
 import axios from 'axios';
 import {
   GET_BOOKED_SEATS,
-  BOOK_SEATS,
-  BOOK_SEATS_FAIL,
   CLEAN_SEATS_BOOKED_BY_USER,
   GET_GOODS,
   PREPARE_SEATS_FOR_BOOKING,
@@ -29,32 +27,13 @@ export const getBookedSeats = id => async dispatch => {
     });
 };
 
-export const bookSeats = transaction => async (dispatch, getState) => {
-  await axios
-    .post('/booking', transaction, tokenConfig(getState))
-    .then(() => {
-      dispatch({
-        type: BOOK_SEATS,
-        payload: transaction.seatsPreparedForBooking,
-      });
-    })
-    .catch(err => {
-      if (err.response) {
-        dispatch(returnErrors(err.response.data, err.response.status, 'BOOK_SEATS_FAIL'));
-        dispatch({
-          type: BOOK_SEATS_FAIL,
-        });
-      }
-    });
-};
-
 export const intentPayment = transaction => async (dispatch, getState) => {
   await axios
-    .post('/payment', transaction, tokenConfig(getState))
-    .then(response => {
+    .post(`/booking/payment`, transaction, tokenConfig(getState))
+    .then(() => {
       dispatch({
         type: INTENT_PAYMENT,
-        payload: response,
+        payload: transaction.seatsPreparedForBooking,
       });
     })
     .catch(err => {
