@@ -20,7 +20,7 @@ class SignUp extends Component {
   componentDidUpdate(prevProps) {
     const { error } = this.props;
     if (error !== prevProps.error) {
-      this.setState({ message: error.id === 'REGISTER_FAIL' ? error.message.message : null });
+      this.setState({ message: error.id === 'REGISTER_FAIL' ? 'Login is already taken!' : null });
     }
   }
 
