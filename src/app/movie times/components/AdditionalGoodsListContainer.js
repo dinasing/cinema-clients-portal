@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 import io from 'socket.io-client';
 import { Link } from 'react-router-dom';
 import { Col, Row, Alert, Button } from 'reactstrap';
-import { bookSeats, prepareGoodsForPayment } from '../actions/bookingAction';
+import { prepareGoodsForPayment } from '../actions/bookingAction';
 import { AdditionalGoodsList } from './AdditionalGoodsList';
 import { TotalCostContainer } from './TotalCostContainer';
 
@@ -27,7 +27,6 @@ class AdditionalGoodsListContainer extends Component {
 
     this.state = {
       selectedAdditionalGoods: [],
-      message: null,
     };
   }
 
@@ -74,42 +73,6 @@ class AdditionalGoodsListContainer extends Component {
     });
   };
 
-  handleSubmitSeatsForBooking = async () => {
-    const {
-      seatsPreparedForBooking,
-      movieTime: { id },
-    } = this.props.movieTime;
-    const { selectedAdditionalGoods } = this.state;
-    const movieTimeId = id;
-    const userId = this.props.auth.user.id;
-    const additionalGoods = selectedAdditionalGoods.filter(goods => goods.number !== 0);
-
-    await this.props.bookSeats({
-      seatsPreparedForBooking,
-      movieTimeId,
-      userId,
-      additionalGoods,
-    });
-
-    seatsPreparedForBooking.forEach(seat => {
-      socket.emit('delete-seat-from-booked', {
-        row: seat.row,
-        seat: seat.seat,
-        userId,
-        movieTimeId,
-      });
-    });
-  };
-
-  onDismissErrorAlert = () => {
-    this.setState({ message: null });
-  };
-
-  onDismissSuccessAlert = () => {
-    const { id } = this.props.movieTime.movieTime;
-    window.location.href = `/session/${id}`;
-  };
-
   render() {
     const {
       movie_time_additional_goods_prices,
@@ -118,7 +81,7 @@ class AdditionalGoodsListContainer extends Component {
     } = this.props.movieTime.movieTime;
 
     const { seatsPreparedForBooking, seatsBookedByUser } = this.props.movieTime;
-    const { selectedAdditionalGoods, message } = this.state;
+    const { selectedAdditionalGoods } = this.state;
     const { seatTypes } = this.props.seatType;
 
     const additionalGoods = movie_time_additional_goods_prices
@@ -134,16 +97,6 @@ class AdditionalGoodsListContainer extends Component {
     return (
       <>
         <h4>add snack to your ticket</h4>
-        <Alert isOpen={message} toggle={this.onDismissErrorAlert} color="danger">
-          {message}
-        </Alert>
-        <Alert
-          isOpen={seatsBookedByUser.length && !message}
-          toggle={this.onDismissSuccessAlert}
-          color="success"
-        >
-          Booking successfully completed!
-        </Alert>
 
         <Row>
           <Col>
@@ -180,7 +133,6 @@ AdditionalGoodsListContainer.propTypes = {
   movieTime: PropTypes.object.isRequired,
   seatType: PropTypes.object.isRequired,
   auth: PropTypes.object.isRequired,
-  bookSeats: PropTypes.func.isRequired,
   prepareGoodsForPayment: PropTypes.func.isRequired,
 };
 
@@ -190,6 +142,4 @@ const mapStateToProps = state => ({
   auth: state.rootReducer.auth,
 });
 
-export default connect(mapStateToProps, { bookSeats, prepareGoodsForPayment })(
-  AdditionalGoodsListContainer
-);
+export default connect(mapStateToProps, { prepareGoodsForPayment })(AdditionalGoodsListContainer);

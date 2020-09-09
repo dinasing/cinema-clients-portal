@@ -10,7 +10,6 @@ import { getMovieTimeById } from '../actions/movieTimeAction';
 import { getSeatTypes } from '../../seat type/actions/seatTypeAction';
 import {
   getBookedSeats,
-  bookSeats,
   cleanSeatsBookedByUser,
   prepareSeatsForBooking,
 } from '../actions/bookingAction';
@@ -81,7 +80,7 @@ const BookSelectedSeatsButton = props => {
           : null}
       </p>
       {numberOfSeats ? <p>total price: {seatsPrice}$</p> : null}
-      <Link to={`${id}/payment`} disabled={!numberOfSeats}>
+      <Link to={`/session/${id}/payment`} disabled={!numberOfSeats}>
         <Button
           outline
           color="primary"
@@ -114,7 +113,7 @@ class BookingContainer extends Component {
   constructor(props) {
     super(props);
 
-    this.state = { selectedSeats: [], seatsPrice: 0, message: null, showLoginModal: false };
+    this.state = { selectedSeats: [], message: null, showLoginModal: false };
 
     const { movie_time_id } = this.props.match.params;
     socket.emit('get-seats', movie_time_id);
@@ -122,7 +121,6 @@ class BookingContainer extends Component {
       const userId = this.props.auth.isAuthenticated ? this.props.auth.user.id : null;
       const seatsSelectedByUser = userId ? bookedSeats.filter(seat => seat.userId == userId) : [];
       const seatsToBookByOthers = bookedSeats.filter(seat => seat.userId !== userId);
-
       this.setState({
         seatsToBookByOthers,
         selectedSeats: seatsSelectedByUser,
@@ -143,21 +141,23 @@ class BookingContainer extends Component {
     }
   }
 
+  componentWillUnmount() {
+    socket.close();
+  }
+
   handleSelectSeat = (rowIndex, seatIndex, seatsType) => () => {
     const { isAuthenticated } = this.props.auth;
     if (isAuthenticated) {
-      const { selectedSeats, seatsPrice } = this.state;
-      const { movie_time_prices } = this.props.movieTime.movieTime;
+      const { selectedSeats } = this.state;
 
       const movieTimeId = this.props.match.params.movie_time_id;
       const userId = this.props.auth.user.id;
 
-      const seatPrice = movie_time_prices.find(price => price.seatTypeId === seatsType).price;
       let newSeats = [];
 
       if (
-        selectedSeats.some(
-          selectedSeat => selectedSeat.row == rowIndex && selectedSeat.seat == seatIndex
+        selectedSeats.find(
+          selectedSeat => selectedSeat.row === rowIndex && selectedSeat.seat === seatIndex
         )
       ) {
         newSeats = selectedSeats.filter(
@@ -174,13 +174,7 @@ class BookingContainer extends Component {
         socket.emit('book-seat', { row: rowIndex, seat: seatIndex, userId, movieTimeId });
       }
 
-      const newPrice = selectedSeats.some(
-        selectedSeat => selectedSeat.row == rowIndex && selectedSeat.seat == seatIndex
-      )
-        ? seatsPrice - +seatPrice
-        : seatsPrice + +seatPrice;
-
-      this.setState({ selectedSeats: newSeats, seatsPrice: newPrice });
+      this.setState({ selectedSeats: newSeats });
     } else {
       this.showLoginModal();
     }
@@ -196,50 +190,13 @@ class BookingContainer extends Component {
     }));
   };
 
-  handleSubmitSeatsForBooking = async () => {
-    const { selectedSeats: seatsPreparedForBooking } = this.state;
-    const movieTimeId = this.props.match.params.movie_time_id;
-    const userId = this.props.auth.user.id;
-    const additionalGoods = [];
-
-    await this.props.bookSeats({
-      seatsPreparedForBooking,
-      movieTimeId,
-      userId,
-      additionalGoods,
-    });
-
-    seatsPreparedForBooking.forEach(seat => {
-      socket.emit('delete-seat-from-booked', {
-        row: seat.row,
-        seat: seat.seat,
-        userId,
-        movieTimeId,
-      });
-    });
-
-    this.setState({ selectedSeats: [], seatsPrice: 0 });
-  };
-
-  onDismissSuccessAlert = () => {
-    this.props.cleanSeatsBookedByUser();
-  };
-
-  onDismissErrorAlert = () => {
-    this.setState({ message: null });
-  };
-
   prepareSeats = async () => {
     const { selectedSeats } = this.state;
     await this.props.prepareSeatsForBooking(selectedSeats);
   };
 
-  componentWillUnmount() {
-    socket.close();
-  }
-
   render() {
-    const { selectedSeats, seatsPrice, message, seatsToBookByOthers, showLoginModal } = this.state;
+    const { selectedSeats, seatsToBookByOthers, showLoginModal } = this.state;
     const {
       cinema_hall,
       date,
@@ -249,7 +206,21 @@ class BookingContainer extends Component {
       movie_time_prices,
       movie_time_additional_goods_prices,
     } = this.props.movieTime.movieTime;
-    const { bookedSeats, seatsBookedByUser } = this.props.movieTime;
+    const { bookedSeats } = this.props.movieTime;
+
+    const seatsPrice = movie_time_prices
+      ? selectedSeats.reduce(
+          (price, seat) =>
+            (price += movie_time_prices.find(
+              movieTimePrice => seat.seatTypeId === movieTimePrice.seatTypeId
+            )
+              ? movie_time_prices.find(
+                  movieTimePrice => seat.seatTypeId === movieTimePrice.seatTypeId
+                ).price
+              : 0),
+          0
+        )
+      : 0;
 
     const { movie_time_id } = this.props.match.params;
     const { seatTypes } = this.props.seatType;
@@ -268,18 +239,6 @@ class BookingContainer extends Component {
         </Modal>
         {movieTimeInfo ? <MovieTimeInfoHeader movieTimeInfo={movieTimeInfo} /> : null}
         <br />
-        <Alert isOpen={message} toggle={this.onDismissErrorAlert} color="danger">
-          {message}
-        </Alert>
-
-        <Alert
-          isOpen={seatsBookedByUser.length && !message}
-          toggle={this.onDismissSuccessAlert}
-          color="success"
-        >
-          Booking successfully completed!
-        </Alert>
-
         <Row>
           <Col lg="auto">
             {cinema_hall && seatTypes && bookedSeats ? (
@@ -287,10 +246,11 @@ class BookingContainer extends Component {
                 schema={cinema_hall.schema}
                 hallTitle={cinema_hall.title}
                 seatTypes={seatTypes}
-                bookedSeats={bookedSeats.concat(seatsToBookByOthers)}
+                bookedSeats={
+                  seatsToBookByOthers ? bookedSeats.concat(seatsToBookByOthers) : bookedSeats
+                }
                 selectedSeats={selectedSeats}
                 handleSelectSeat={this.handleSelectSeat}
-                seatsBookedByUser={seatsBookedByUser}
               />
             ) : null}
           </Col>
@@ -325,7 +285,6 @@ BookingContainer.propTypes = {
   getMovieTimeById: PropTypes.func.isRequired,
   getSeatTypes: PropTypes.func.isRequired,
   getBookedSeats: PropTypes.func.isRequired,
-  bookSeats: PropTypes.func.isRequired,
   cleanSeatsBookedByUser: PropTypes.func.isRequired,
   prepareSeatsForBooking: PropTypes.func.isRequired,
 };
@@ -340,7 +299,6 @@ export default connect(mapStateToProps, {
   getMovieTimeById,
   getSeatTypes,
   getBookedSeats,
-  bookSeats,
   cleanSeatsBookedByUser,
   prepareSeatsForBooking,
 })(BookingContainer);
