@@ -171,7 +171,13 @@ class BookingContainer extends Component {
         });
       } else {
         newSeats = [...selectedSeats, { row: rowIndex, seat: seatIndex, seatTypeId: seatsType }];
-        socket.emit('book-seat', { row: rowIndex, seat: seatIndex, userId, movieTimeId });
+        socket.emit('book-seat', {
+          row: rowIndex,
+          seat: seatIndex,
+          userId,
+          movieTimeId,
+          seatTypeId: seatsType,
+        });
       }
 
       this.setState({ selectedSeats: newSeats });
@@ -220,7 +226,7 @@ class BookingContainer extends Component {
               : 0),
           0
         )
-      : 0;
+      : 'Loading...';
 
     const { movie_time_id } = this.props.match.params;
     const { seatTypes } = this.props.seatType;
