@@ -77,7 +77,7 @@ export default function(state = initialState, action) {
     case INTENT_PAYMENT:
       return {
         ...state,
-        bookedSeats: state.bookedSeats.concat(action.payload),
+        seatsBookedByUser: action.payload,
       };
     case INTENT_PAYMENT_FAIL:
     default:
