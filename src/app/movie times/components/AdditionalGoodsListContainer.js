@@ -40,10 +40,6 @@ class AdditionalGoodsListContainer extends Component {
     });
   }
 
-  componentWillUnmount() {
-    socket.close();
-  }
-
   prepareGoods = async () => {
     const { selectedAdditionalGoods } = this.state;
     await this.props.prepareGoodsForPayment(selectedAdditionalGoods);

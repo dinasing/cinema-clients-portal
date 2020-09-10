@@ -13,6 +13,10 @@ const socket = io('http://localhost:3000');
 class PaymentContainer extends Component {
   state = { message: null };
 
+  componentDidMount() {
+    this.props.clearErrors();
+  }
+
   handleToken = async token => {
     const {
       seatsPreparedForBooking,
@@ -30,36 +34,16 @@ class PaymentContainer extends Component {
         token,
       })
       .then(() => {
-        this.props.clearErrors();
         seatsPreparedForBooking.forEach(seat => {
           socket.emit('delete-seat-from-booked', {
             row: seat.row,
             seat: seat.seat,
             userId,
-            movieTimeId,
+            movieTimeId: id,
           });
         });
       });
   };
-
-  componentDidMount() {
-    this.props.clearErrors();
-
-    const userId = this.props.auth.user.id;
-
-    const {
-      seatsPreparedForBooking,
-      movieTime: { id },
-    } = this.props.movieTime;
-    seatsPreparedForBooking.forEach(seat => {
-      socket.emit('delete-seat-from-booked', {
-        row: seat.row,
-        seat: seat.seat,
-        userId,
-        movieTimeId: id,
-      });
-    });
-  }
 
   onDismissSuccessAlert = () => {
     const { id } = this.props.movieTime.movieTime;
@@ -69,10 +53,6 @@ class PaymentContainer extends Component {
   onDismissErrorAlert = () => {
     this.props.clearErrors();
   };
-
-  componentWillUnmount() {
-    socket.close();
-  }
 
   render() {
     const {

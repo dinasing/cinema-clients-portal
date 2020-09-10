@@ -141,10 +141,6 @@ class BookingContainer extends Component {
     }
   }
 
-  componentWillUnmount() {
-    socket.close();
-  }
-
   handleSelectSeat = (rowIndex, seatIndex, seatsType) => () => {
     const { isAuthenticated } = this.props.auth;
     if (isAuthenticated) {
