@@ -4,16 +4,14 @@ import PropTypes from 'prop-types';
 import { Button, Container, Input, Label, FormGroup, Form, Alert } from 'reactstrap';
 import { register } from '../actions/authAction';
 import { clearErrors } from '../../common/actions/errorAction';
+import SignUpForm from './SignUpForm';
 
 class SignUp extends Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      email: '',
-      password: '',
-      firstName: '',
-      lastName: '',
+      message: null,
     };
   }
 
@@ -24,17 +22,7 @@ class SignUp extends Component {
     }
   }
 
-  handleChange = e => {
-    this.setState({
-      [e.target.id]: e.target.value,
-    });
-  };
-
-  handleSubmit = e => {
-    e.preventDefault();
-
-    const { firstName, lastName, email, password } = this.state;
-    const newUser = { firstName, lastName, email, password };
+  handleSubmit = newUser => {
     this.props.register(newUser);
   };
 
@@ -42,51 +30,11 @@ class SignUp extends Component {
     const { message } = this.state;
 
     return (
-      <Container>
+      <>
         {message ? <Alert color="danger">{message}</Alert> : null}
-        <Form onSubmit={this.handleSubmit}>
-          <FormGroup>
-            <h1>sign up</h1>
-            <Label htmlFor="firstName">first name</Label>
-            <Input
-              className="mb-3"
-              type="text"
-              id="firstName"
-              onChange={this.handleChange}
-              placeholder=""
-            />
-
-            <Label htmlFor="lastName">last name</Label>
-            <Input
-              className="mb-3"
-              type="text"
-              id="lastName"
-              onChange={this.handleChange}
-              placeholder=""
-            />
-
-            <Label htmlFor="email">email</Label>
-            <Input
-              className="mb-3"
-              type="email"
-              id="email"
-              onChange={this.handleChange}
-              placeholder=""
-            />
-
-            <Label htmlFor="password">password</Label>
-            <Input
-              className="mb-3"
-              type="password"
-              id="password"
-              onChange={this.handleChange}
-              placeholder=""
-            />
-
-            <Button color="primary">sign up</Button>
-          </FormGroup>
-        </Form>
-      </Container>
+        <h1>sign up</h1>
+        <SignUpForm handleSubmit={this.handleSubmit} handleChange={this.handleChange} />
+      </>
     );
   }
 }
